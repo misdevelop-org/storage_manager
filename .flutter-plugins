@@ -1,0 +1,15 @@
+# This is a generated file; do not edit or check into version control.
+firebase_core=/Users/imac/flutter/.pub-cache/hosted/pub.dartlang.org/firebase_core-1.12.0/
+firebase_core_web=/Users/imac/flutter/.pub-cache/hosted/pub.dartlang.org/firebase_core_web-1.5.4/
+firebase_storage=/Users/imac/flutter/.pub-cache/hosted/pub.dartlang.org/firebase_storage-10.2.6/
+firebase_storage_web=/Users/imac/flutter/.pub-cache/hosted/pub.dartlang.org/firebase_storage_web-3.2.7/
+multi_image_picker=/Users/imac/flutter/.pub-cache/hosted/pub.dartlang.org/multi_image_picker-4.8.01/
+path_provider_linux=/Users/imac/flutter/.pub-cache/hosted/pub.dartlang.org/path_provider_linux-2.1.5/
+path_provider_windows=/Users/imac/flutter/.pub-cache/hosted/pub.dartlang.org/path_provider_windows-2.0.5/
+shared_preferences=/Users/imac/flutter/.pub-cache/hosted/pub.dartlang.org/shared_preferences-2.0.12/
+shared_preferences_android=/Users/imac/flutter/.pub-cache/hosted/pub.dartlang.org/shared_preferences_android-2.0.10/
+shared_preferences_ios=/Users/imac/flutter/.pub-cache/hosted/pub.dartlang.org/shared_preferences_ios-2.0.9/
+shared_preferences_linux=/Users/imac/flutter/.pub-cache/hosted/pub.dartlang.org/shared_preferences_linux-2.0.4/
+shared_preferences_macos=/Users/imac/flutter/.pub-cache/hosted/pub.dartlang.org/shared_preferences_macos-2.0.2/
+shared_preferences_web=/Users/imac/flutter/.pub-cache/hosted/pub.dartlang.org/shared_preferences_web-2.0.3/
+shared_preferences_windows=/Users/imac/flutter/.pub-cache/hosted/pub.dartlang.org/shared_preferences_windows-2.0.4/
