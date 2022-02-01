@@ -17,7 +17,7 @@ class FireUploader {
   List<Asset> selectedAssets = [];
   BuildContext context;
 
-  Future<bool> mostrarCargaDatos(BuildContext context, UploadTask task) async {
+  Future<bool> showDataUploadProgress(BuildContext context, UploadTask task) async {
     bool successUpload = false;
 
     await showFlash(
@@ -54,14 +54,14 @@ class FireUploader {
     return successUpload;
   }
 
-  Future<String> subirDatos(
+  Future<String> uploadFile(
     File file,
   ) async {
     final Reference storageReference = FirebaseStorage.instance.ref(path);
 
     UploadTask uploadTask = storageReference.putFile(file);
     if (showProgress) {
-      await mostrarCargaDatos(context, uploadTask);
+      await showDataUploadProgress(context, uploadTask);
     }
 
     TaskSnapshot storageTaskSnapshot = await uploadTask.whenComplete(() {});
@@ -69,30 +69,30 @@ class FireUploader {
     return link;
   }
 
-  Future<String> subirDatosCrudo(
+  Future<String> uploadRawData(
     List<int> data,
   ) async {
     final Reference storageReference = FirebaseStorage.instance.ref(path);
 
     UploadTask uploadTask = storageReference.putData(data as Uint8List);
     if (showProgress) {
-      await mostrarCargaDatos(context, uploadTask);
+      await showDataUploadProgress(context, uploadTask);
     }
     TaskSnapshot storageTaskSnapshot = await uploadTask.whenComplete(() {});
     String link = await storageTaskSnapshot.ref.getDownloadURL();
     return link;
   }
 
-  Future<List<String>> seleccionYSubir() async {
+  Future<List<String>> selectAndUpload() async {
     //
     selectedAssets = await MultiImagePicker.pickImages(
       maxImages: maxImagesCount,
       enableCamera: true,
     );
-    return (await subir());
+    return (await upload());
   }
 
-  Future<List<String>> subir() async {
+  Future<List<String>> upload() async {
     for (var imageFile in selectedAssets) {
       links.add((await postImage(imageFile)));
     }
@@ -107,7 +107,7 @@ class FireUploader {
     Reference reference = FirebaseStorage.instance.ref(path + fileName);
     UploadTask uploadTask = reference.putData(byteData.buffer.asUint8List());
     if (showProgress) {
-      await mostrarCargaDatos(context, uploadTask);
+      await showDataUploadProgress(context, uploadTask);
     }
     TaskSnapshot storageTaskSnapshot = await uploadTask.whenComplete(() {});
     String link = await storageTaskSnapshot.ref.getDownloadURL();
@@ -120,7 +120,7 @@ class FireUploader {
     Reference reference = FirebaseStorage.instance.ref(path + fileName);
     UploadTask uploadTask = reference.putData(byteData as Uint8List);
     if (showProgress) {
-      await mostrarCargaDatos(context, uploadTask);
+      await showDataUploadProgress(context, uploadTask);
     }
     TaskSnapshot storageTaskSnapshot = await uploadTask.whenComplete(() {});
     String link = await storageTaskSnapshot.ref.getDownloadURL();
@@ -132,7 +132,7 @@ class FireUploader {
 class ProgressFromUploadTask extends StatefulWidget {
   UploadTask task;
   Function onDone;
-  ProgressFromUploadTask({required this.task, required this.onDone});
+  ProgressFromUploadTask({Key? key, required this.task, required this.onDone}) : super(key: key);
   @override
   _ProgressFromUploadTaskState createState() => _ProgressFromUploadTaskState();
 }
@@ -157,8 +157,9 @@ class _ProgressFromUploadTaskState extends State<ProgressFromUploadTask> {
   @override
   void dispose() {
     super.dispose();
-    if(streamSubscription!=null)streamSubscription!.cancel();
+    if (streamSubscription != null) streamSubscription!.cancel();
   }
+
   @override
   void initState() {
     super.initState();
@@ -167,11 +168,20 @@ class _ProgressFromUploadTaskState extends State<ProgressFromUploadTask> {
 
   @override
   Widget build(BuildContext context) {
-    return ended?Row(
-      children: const [
-        Icon(Icons.done,size: 30,color: Colors.white,),
-        Text("Done!",style: TextStyle(color: Colors.white,fontSize: 20),),
-      ],
-    ):LinearProgressIndicator(value: value);
+    return ended
+        ? Row(
+            children: const [
+              Icon(
+                Icons.done,
+                size: 30,
+                color: Colors.white,
+              ),
+              Text(
+                "Done!",
+                style: TextStyle(color: Colors.white, fontSize: 20),
+              ),
+            ],
+          )
+        : LinearProgressIndicator(value: value);
   }
 }

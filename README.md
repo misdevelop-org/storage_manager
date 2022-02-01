@@ -42,13 +42,13 @@ Save images, text and data to device persistor
 Get images, text and data to device persistor
 
 ```dart
-  String localPath = await DataPersistor().getImage('/collectionName/Image.png');
+  var imageBytes = await DataPersistor().getImage('/collectionName/Image.png');
 ```
 
 Remove images, text and data to device persistor
 
 ```dart
-  String localPath = await DataPersistor().removeImage('/collectionName/Image.png');
+  DataPersistor().removeImage('/collectionName/Image.png');
 ```
 
 

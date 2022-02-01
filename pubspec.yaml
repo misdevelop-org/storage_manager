@@ -1,6 +1,6 @@
 name: storage_manager
 description: FireStorage & DevicePersistor Manager
-version: 0.0.1
+version: 0.0.3
 homepage: https://github.com/SirLegui/storage_manager
 
 environment:
@@ -10,7 +10,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  license: ^1.0.1
   firebase_storage: ^10.2.0
   firebase: ^9.0.2
   flash: ^2.0.3
