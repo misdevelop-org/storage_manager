@@ -1,4 +1,4 @@
 library storage_manager;
 
-export 'src/LocalKeyValuePersistence.dart';
-export 'src/imagePicker.dart';
+export 'src/device_persistor.dart';
+export 'src/firestore.dart';
