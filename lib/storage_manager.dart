@@ -1,4 +1,4 @@
 library storage_manager;
 
 export 'src/device_persistor.dart';
-export 'src/firestore.dart';
+export 'src/firestorage.dart';

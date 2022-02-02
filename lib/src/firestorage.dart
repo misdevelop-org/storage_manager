@@ -180,26 +180,19 @@ class _ProgressFromUploadTaskState extends State<ProgressFromUploadTask> {
   double value = 0;
   bool ended = false;
 
-  StreamSubscription<TaskSnapshot>? streamSubscription;
-
   ///Shows the ProgressIndicator in the flash bar
   show() async {
-    streamSubscription = widget.task.snapshotEvents.listen((event) {
-      setState(() {
-        value = event.bytesTransferred / event.totalBytes;
-      });
-      if (value == 1 && !ended) {
-        streamSubscription!.cancel();
-        widget.onDone();
-        ended = true;
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    if (streamSubscription != null) streamSubscription!.cancel();
-    super.dispose();
+    widget.task.snapshotEvents.listen(
+      (event) {
+        setState(() {
+          value = event.bytesTransferred / event.totalBytes;
+        });
+        if (value == 1 && !ended) {
+          widget.onDone();
+          ended = true;
+        }
+      },
+    );
   }
 
   @override
