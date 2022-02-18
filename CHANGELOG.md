@@ -1,13 +1,21 @@
-## 0.1.4
+## 0.1.10
 
-Improved readme
+Bug fix XFile null safety
 
-## 0.1.3
+## 0.1.1 - 0.1.9
 
-Minor fixes
-## 0.1.1
 
-Minor formatting fixes
+* Bug fixes and added functions
+
+* Improved docs and added functions
+
+* Supports gallery and camera selection with a default Modal Bottom Sheet selector
+
+* Improved readme
+
+* Minor fixes
+
+* Minor formatting fixes
 
 ## 0.1.0
 

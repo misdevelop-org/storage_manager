@@ -82,18 +82,44 @@ class FireUploader {
     return successUpload;
   }
 
-  ///Select assets from gallery and returns the uploaded file paths
-  Future<List<String>> selectAndUpload() async {
-    await selectAssets();
-    return (await uploadSelectedAssets());
+  ///Select assets from gallery or camera and returns the uploaded file paths
+  ///
+  ///Select gallery as source by setting [isGallery] to true
+  ///
+  ///Select camera as source by setting [isGallery] to false
+  ///
+  ///Let the default showModalBottomSheet get the source from user by setting [isGallery] to null
+  ///
+  /// [isGallery] defaults to null
+  Future<List<String>> selectAndUpload(
+      {bool? isGallery, Color? backgroundColor = Colors.transparent}) async {
+    if (await selectAssets(
+        isGallery: isGallery, backgroundColor: backgroundColor)) {
+      return (await uploadSelectedAssets());
+    } else {
+      return <String>[];
+    }
   }
 
-  ///Select assets from gallery and stores the Assets in the variable [selectedAssets]
-  Future<void> selectAssets() async {
-    selectedAssets = (maxImagesCount > 1
-            ? await ImagePicker().pickMultiImage()
-            : [await ImagePicker().pickImage(source: ImageSource.gallery)])
-        as List<XFile>?;
+  ///Select assets from gallery or camera and stores the Assets in the variable [selectedAssets]
+  ///Select gallery as source by setting [isGallery] to true
+  ///Select camera as source by setting [isGallery] to false
+  ///Let the default showModalBottomSheet get the source from user by setting [isGallery] to null
+  ///
+  /// [isGallery] defaults to null
+  Future<bool> selectAssets(
+      {bool? isGallery, Color? backgroundColor = Colors.transparent}) async {
+    isGallery ??= await getSource(backgroundColor: backgroundColor);
+    if (isGallery == null) {
+      return false;
+    }
+    selectedAssets = (maxImagesCount > 1 && isGallery
+        ? await ImagePicker().pickMultiImage()
+        : [
+            await ImagePicker().pickImage(
+                source: isGallery ? ImageSource.gallery : ImageSource.camera)
+          ].map((e) => e!).toList());
+    return true;
   }
 
   ///Uploads the Assets in [selectedAssets]
@@ -102,6 +128,102 @@ class FireUploader {
       links.add((await saveImage(imageFile)));
     }
     return links;
+  }
+
+  ///Let the default showModalBottomSheet get the source from user
+  Future<bool?> getSource({Color? backgroundColor = Colors.transparent}) async {
+    return await showModalBottomSheet<bool?>(
+      context: context!,
+      backgroundColor: backgroundColor,
+      builder: (BuildContext context) {
+        double size = 80;
+        double iconSize = 30;
+        return SizedBox(
+          height: 160 + MediaQuery.of(context).viewPadding.bottom,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              SizedBox(
+                height: size,
+                width: 150,
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(false);
+                  },
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                              height: size,
+                              width: size,
+                              decoration: BoxDecoration(
+                                color: Colors.lightBlue[700],
+                                shape: BoxShape.circle,
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Icon(
+                                  Icons.camera,
+                                  size: iconSize,
+                                  color: Colors.white,
+                                ),
+                              )),
+                        ),
+                        const Text(
+                          "Camera",
+                          style: TextStyle(color: Colors.white, fontSize: 24),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ), //Camera
+              SizedBox(
+                height: size,
+                width: 150,
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(true);
+                  },
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                              height: size,
+                              width: size,
+                              decoration: BoxDecoration(
+                                color: Colors.blue[900],
+                                shape: BoxShape.circle,
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Icon(
+                                  Icons.photo,
+                                  size: iconSize,
+                                  color: Colors.white,
+                                ),
+                              )),
+                        ),
+                        const Text(
+                          "Gallery",
+                          style: TextStyle(color: Colors.white, fontSize: 24),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ), //Gallery
+            ],
+          ),
+        );
+      },
+    );
   }
 
   ///Uploads the selected Asset and returns file link
@@ -204,19 +326,26 @@ class _ProgressFromUploadTaskState extends State<ProgressFromUploadTask> {
   @override
   Widget build(BuildContext context) {
     return ended
-        ? Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              Icon(
-                Icons.done,
-                size: 30,
-                color: Colors.white,
-              ),
-              Text(
-                "Done!",
-                style: TextStyle(color: Colors.white, fontSize: 20),
-              ),
-            ],
+        ? Container(
+            width: 100,
+            height: 60,
+            decoration: BoxDecoration(
+                color: Colors.green[700],
+                borderRadius: BorderRadius.circular(20)),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                Icon(
+                  Icons.done,
+                  size: 30,
+                  color: Colors.white,
+                ),
+                Text(
+                  "Done!",
+                  style: TextStyle(color: Colors.white, fontSize: 20),
+                ),
+              ],
+            ),
           )
         : LinearProgressIndicator(value: value);
   }
