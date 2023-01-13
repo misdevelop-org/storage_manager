@@ -12,7 +12,7 @@ import '../src/repository.dart';
 /// Supports objects in JSON format (saveObject)
 class DataPersistor implements Repository {
   /// Supports images,videos, audios and raw bytes
-  @override
+  //@override
   Future<String> saveImage(String path, Uint8List image) async {
     final base64Image = const Base64Encoder().convert(image);
     final prefs = await SharedPreferences.getInstance();
@@ -22,22 +22,22 @@ class DataPersistor implements Repository {
 
   /// Supports objects in JSON format as Map<String, dynamic>
   @override
-  Future<bool> saveObject(String path, Map<String, dynamic> object) async {
+  Future<bool> saveObject(String path, object) async {
     final prefs = await SharedPreferences.getInstance();
-    final string = const JsonEncoder().convert(object);
+    final string = const JsonEncoder().convert(object as Map<String, dynamic>);
 
     return await prefs.setString(path, string);
   }
 
   /// Supports text and raw data as String
-  @override
+  // @override
   void saveString(String path, String value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(path, value);
   }
 
   /// Gets media bytes with given [path] as String
-  @override
+  // @override
   Future<Uint8List> getImage(String path) async {
     final prefs = await SharedPreferences.getInstance();
     final base64Image = prefs.getString(path);
@@ -57,14 +57,13 @@ class DataPersistor implements Repository {
   }
 
   /// Gets text with given [path] as String
-  @override
+  // @override
   Future<String> getString(String path) async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(path) ?? '';
   }
 
   /// Removes media bytes with given [path] as String
-  @override
   Future<void> removeImage(String path) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(path);
@@ -78,7 +77,6 @@ class DataPersistor implements Repository {
   }
 
   /// Removes text with given [path] as String
-  @override
   Future<void> removeString(String path) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(path);

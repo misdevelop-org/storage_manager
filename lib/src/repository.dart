@@ -28,27 +28,28 @@
  * THE SOFTWARE.
  */
 
-import 'dart:typed_data';
-
 abstract class Repository {
   //set
-  void saveString(String path, String value);
+  // void saveString(String path, String value);
+  //
+  // Future<String> saveImage(String path, Uint8List image);
 
-  Future<String> saveImage(String path, Uint8List image);
-
-  void saveObject(String path, Map<String, dynamic> object);
+  void saveObject(String path, dynamic object);
 
   //gets
-  Future<String> getString(String path);
+  // Future<String> getString(String path);
+  //
+  // Future<Uint8List> getImage(String path);
 
-  Future<Uint8List> getImage(String path);
-
-  Future<Map<String, dynamic>> getObject(String path);
+  Future<void> getObject(String path);
 
   //deletes
-  Future<void> removeString(String path);
-
-  Future<void> removeImage(String path);
 
   Future<void> removeObject(String path);
+}
+
+class StorageObject {
+  String path;
+  dynamic object;
+  StorageObject(this.path, this.object);
 }
