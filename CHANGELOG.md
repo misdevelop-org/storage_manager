@@ -1,3 +1,7 @@
+## 0.1.11
+
+Supporting the latest version of Firebase Storage and Shared Preferences
+
 ## 0.1.10
 
 Bug fix XFile null safety

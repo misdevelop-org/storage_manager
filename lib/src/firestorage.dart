@@ -22,7 +22,8 @@ class FireUploader implements Repository {
   ///
   /// * [BuildContext] context: if [showProgress] is true, MUST set the [context]
   @override
-  Future<String> saveObject(String path, byteData, {String? extensionFormat, String? fileName, bool showProgress = false, BuildContext? context}) async {
+  Future<String> saveObject(String path, byteData,
+      {String? extensionFormat, String? fileName, bool showProgress = false, BuildContext? context}) async {
     String fileNameAux = fileName ?? DateTime.now().millisecondsSinceEpoch.toString();
     Reference reference = FirebaseStorage.instance.ref(path + fileNameAux + (extensionFormat ?? ""));
     UploadTask? uploadTask;
@@ -41,7 +42,7 @@ class FireUploader implements Repository {
     }
     if (showProgress) {
       if (context != null) {
-        await showDataUploadProgress(context!, uploadTask);
+        await showDataUploadProgress(context, uploadTask);
       } else {
         if (kDebugMode) {
           throw 'Must set context if show progress is true';
