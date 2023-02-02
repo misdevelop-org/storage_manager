@@ -85,24 +85,20 @@ class FireUploader implements Repository {
   showDataUploadProgress(BuildContext buildContext, UploadTask uploadTask) {
     return showDialog(
       context: buildContext,
-      barrierDismissible: false,
+      barrierDismissible: true,
       builder: (context) {
         return StreamBuilder<TaskSnapshot>(
           stream: uploadTask.snapshotEvents,
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              var event = snapshot.data;
-              double progressPercent = event!.bytesTransferred / event.totalBytes;
               return AlertDialog(
-                title: const Text('Uploading...'),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    LinearProgressIndicator(value: progressPercent),
-                    Text('${(progressPercent * 100).toStringAsFixed(2)} %'),
-                  ],
-                ),
-              );
+                  title: const Text('Uploading...'),
+                  content: ProgressFromUploadTask(
+                    task: uploadTask,
+                    onDone: () {
+                      Navigator.pop(context);
+                    },
+                  ));
             } else {
               return const AlertDialog(
                 title: Text('Waiting...'),

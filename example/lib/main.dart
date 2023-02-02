@@ -61,7 +61,7 @@ class _MyHomePageState extends State<MyHomePage> {
   ///Let the default showModalBottomSheet get the source from user
   Future<bool?> getSource({Color? backgroundColor = Colors.transparent}) async {
     return await showModalBottomSheet<bool?>(
-      context: context!,
+      context: context,
       backgroundColor: backgroundColor,
       builder: (BuildContext context) {
         double size = 80;

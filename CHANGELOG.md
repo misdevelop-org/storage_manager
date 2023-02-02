@@ -1,3 +1,7 @@
+## 0.1.12
+
+Fixed upload progress bar
+
 ## 0.1.11
 
 Supporting the latest version of Firebase Storage and Shared Preferences
