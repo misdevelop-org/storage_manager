@@ -1,3 +1,9 @@
+## 0.2.1
+Added missing fixes from 0.1.12
+
+## 0.2.0
+Implemented Storage Provider as bloc
+
 ## 0.1.12
 
 Fixed upload progress bar

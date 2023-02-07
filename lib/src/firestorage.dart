@@ -82,6 +82,20 @@ class FireUploader implements Repository {
     return true;
   }
 
+  ///Remove file from Url
+  Future<bool> removeObjectFromUrl(String url) async {
+    try {
+      await FirebaseStorage.instance.refFromURL(url).delete();
+    } catch (err, stack) {
+      if (kDebugMode) {
+        print(err);
+        print(stack);
+      }
+      return false;
+    }
+    return true;
+  }
+
   showDataUploadProgress(BuildContext buildContext, UploadTask uploadTask) {
     return showDialog(
       context: buildContext,

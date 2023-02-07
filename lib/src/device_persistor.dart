@@ -12,7 +12,6 @@ import '../src/repository.dart';
 /// Supports objects in JSON format (saveObject)
 class DataPersistor implements Repository {
   /// Supports images,videos, audios and raw bytes
-  //@override
   Future<String> saveImage(String path, Uint8List image) async {
     final base64Image = const Base64Encoder().convert(image);
     final prefs = await SharedPreferences.getInstance();
@@ -30,14 +29,12 @@ class DataPersistor implements Repository {
   }
 
   /// Supports text and raw data as String
-  // @override
   void saveString(String path, String value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(path, value);
   }
 
   /// Gets media bytes with given [path] as String
-  // @override
   Future<Uint8List> getImage(String path) async {
     final prefs = await SharedPreferences.getInstance();
     final base64Image = prefs.getString(path);
@@ -57,27 +54,14 @@ class DataPersistor implements Repository {
   }
 
   /// Gets text with given [path] as String
-  // @override
   Future<String> getString(String path) async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(path) ?? '';
   }
 
-  /// Removes media bytes with given [path] as String
-  Future<void> removeImage(String path) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(path);
-  }
-
-  /// Removes json object with given [path] as String
+  /// Removes object with given [path] as String
   @override
   Future<void> removeObject(String path) async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.remove(path);
-  }
-
-  /// Removes text with given [path] as String
-  Future<void> removeString(String path) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(path);
   }
