@@ -1,3 +1,9 @@
+## 0.2.3
+Fixed bug with `context` in image picker functions
+
+## 0.2.2
+Added context validation for getSource()
+
 ## 0.2.1
 Added missing fixes from 0.1.12
 

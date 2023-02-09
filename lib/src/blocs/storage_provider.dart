@@ -69,6 +69,9 @@ class StorageProvider {
   Future<bool?> getSource({
     Color? backgroundColor = Colors.transparent,
   }) async {
+    if (_context == null) {
+      throw Exception("Must set context to get source");
+    }
     return await showModalBottomSheet<bool?>(
       context: _context!,
       backgroundColor: backgroundColor,
@@ -212,7 +215,7 @@ class StorageProvider {
       int maxImagesCount = 10,
       BuildContext? context,
       bool showProgress = false}) async {
-    _context = context;
+    _context = context ?? _context;
     _showProgress = showProgress;
     if (await selectAssets(isGallery: isGallery, backgroundColor: backgroundColor, maxImagesCount: maxImagesCount)) {
       return (await uploadSelectedAssets(path, showProgress: showProgress, context: context));
@@ -227,7 +230,11 @@ class StorageProvider {
   ///Let the default showModalBottomSheet get the source from user by setting [isGallery] to null
   /// [isGallery] defaults to null
   Future<bool> selectAssets(
-      {bool? isGallery, Color? backgroundColor = Colors.transparent, int maxImagesCount = 10}) async {
+      {bool? isGallery,
+      BuildContext? context,
+      Color? backgroundColor = Colors.transparent,
+      int maxImagesCount = 10}) async {
+    _context = context ?? _context;
     isGallery ??= await getSource(backgroundColor: backgroundColor);
     if (isGallery == null) {
       return false;
@@ -243,7 +250,7 @@ class StorageProvider {
   ///Uploads the Assets in [selectedAssets]
   Future<List<String>> uploadSelectedAssets(String path,
       {List<XFile>? selectedImages, BuildContext? context, bool showProgress = false}) async {
-    _context = context;
+    _context = context ?? _context;
     _showProgress = showProgress;
     for (var imageFile in selectedImages ?? selectedAssets!) {
       links.add((await saveImage(imageFile, path)));
