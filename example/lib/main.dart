@@ -159,8 +159,10 @@ class _MyHomePageState extends State<MyHomePage> {
   ///Select camera as source by setting [isGallery] to false
   ///Let the default showModalBottomSheet get the source from user by setting [isGallery] to null
   /// [isGallery] defaults to null
-  Future<List<String>> selectAndUpload({bool? isGallery, Color? backgroundColor = Colors.transparent}) async {
-    if (await selectAssets(isGallery: isGallery, backgroundColor: backgroundColor)) {
+  Future<List<String>> selectAndUpload(
+      {bool? isGallery, Color? backgroundColor = Colors.transparent}) async {
+    if (await selectAssets(
+        isGallery: isGallery, backgroundColor: backgroundColor)) {
       return (await uploadSelectedAssets());
     } else {
       return <String>[];
@@ -172,16 +174,18 @@ class _MyHomePageState extends State<MyHomePage> {
   ///Select camera as source by setting [isGallery] to false
   ///Let the default showModalBottomSheet get the source from user by setting [isGallery] to null
   /// [isGallery] defaults to null
-  Future<bool> selectAssets({bool? isGallery, Color? backgroundColor = Colors.transparent}) async {
+  Future<bool> selectAssets(
+      {bool? isGallery, Color? backgroundColor = Colors.transparent}) async {
     isGallery ??= await getSource(backgroundColor: backgroundColor);
     if (isGallery == null) {
       return false;
     }
     selectedAssets = (maxImagesCount > 1 && isGallery
         ? await ImagePicker().pickMultiImage()
-        : [await ImagePicker().pickImage(source: isGallery ? ImageSource.gallery : ImageSource.camera)]
-            .map((e) => e!)
-            .toList());
+        : [
+            await ImagePicker().pickImage(
+                source: isGallery ? ImageSource.gallery : ImageSource.camera)
+          ].map((e) => e!).toList());
     return true;
   }
 

@@ -1,3 +1,6 @@
+## 0.2.4
+Web support added
+
 ## 0.2.3
 Fixed bug with `context` in image picker functions
 

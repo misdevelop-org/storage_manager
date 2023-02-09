@@ -23,9 +23,14 @@ class FireUploader implements Repository {
   /// * [BuildContext] context: if [showProgress] is true, MUST set the [context]
   @override
   Future<String> saveObject(String path, byteData,
-      {String? extensionFormat, String? fileName, bool showProgress = false, BuildContext? context}) async {
-    String fileNameAux = fileName ?? DateTime.now().millisecondsSinceEpoch.toString();
-    Reference reference = FirebaseStorage.instance.ref(path + fileNameAux + (extensionFormat ?? ""));
+      {String? extensionFormat,
+      String? fileName,
+      bool showProgress = false,
+      BuildContext? context}) async {
+    String fileNameAux =
+        fileName ?? DateTime.now().millisecondsSinceEpoch.toString();
+    Reference reference = FirebaseStorage.instance
+        .ref(path + fileNameAux + (extensionFormat ?? ""));
     UploadTask? uploadTask;
     switch (byteData.runtimeType) {
       case String:
@@ -58,9 +63,11 @@ class FireUploader implements Repository {
   }
 
   @override
-  Future<Uint8List?> getObject(String path) async => await referenceFromPath(path).getData();
+  Future<Uint8List?> getObject(String path) async =>
+      await referenceFromPath(path).getData();
 
-  Reference referenceFromPath(String path) => FirebaseStorage.instance.ref(path);
+  Reference referenceFromPath(String path) =>
+      FirebaseStorage.instance.ref(path);
 
   Future<List<String>?> getObjectsFromPath(String path) async {
     final objList = await FirebaseStorage.instance.ref(path).listAll();
@@ -130,7 +137,9 @@ class FireUploader implements Repository {
 class ProgressFromUploadTask extends StatefulWidget {
   final UploadTask task;
   final Function onDone;
-  const ProgressFromUploadTask({Key? key, required this.task, required this.onDone}) : super(key: key);
+  const ProgressFromUploadTask(
+      {Key? key, required this.task, required this.onDone})
+      : super(key: key);
   @override
   _ProgressFromUploadTaskState createState() => _ProgressFromUploadTaskState();
 }
@@ -166,7 +175,9 @@ class _ProgressFromUploadTaskState extends State<ProgressFromUploadTask> {
         ? Container(
             width: 100,
             height: 60,
-            decoration: BoxDecoration(color: Colors.green[700], borderRadius: BorderRadius.circular(20)),
+            decoration: BoxDecoration(
+                color: Colors.green[700],
+                borderRadius: BorderRadius.circular(20)),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: const [

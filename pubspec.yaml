@@ -1,11 +1,11 @@
 name: storage_manager
 description: FireStorage & DevicePersistor Manager facilitates quick implementation in your app
-version: 0.2.3
+version: 0.2.4
 homepage: https://github.com/misdevelop-org/storage_manager
 
 environment:
   sdk: ">=2.17.0 <3.0.0"
-  flutter: ">=1.17.0"
+  flutter: ">=3.4.0"
 
 dependencies:
   flutter:
@@ -18,5 +18,3 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^1.0.0
-
-flutter:

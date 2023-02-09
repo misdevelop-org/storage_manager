@@ -41,11 +41,17 @@ class StorageProvider {
     }
     if (value is Map<String, dynamic>) {
       return await FireUploader().saveObject(path, jsonEncode(value),
-          extensionFormat: extensionFormat, fileName: fileName, showProgress: showProgress, context: context);
+          extensionFormat: extensionFormat,
+          fileName: fileName,
+          showProgress: showProgress,
+          context: context);
     }
 
     return await FireUploader().saveObject(path, value,
-        extensionFormat: extensionFormat, fileName: fileName, showProgress: showProgress, context: context);
+        extensionFormat: extensionFormat,
+        fileName: fileName,
+        showProgress: showProgress,
+        context: context);
   }
 
   ///Uploads the selected Asset and returns file link
@@ -181,7 +187,8 @@ class StorageProvider {
   }
 
   ///Get object from storage or local
-  Future<dynamic> get(String path, {bool isLocal = false, StorageType type = StorageType.string}) async {
+  Future<dynamic> get(String path,
+      {bool isLocal = false, StorageType type = StorageType.string}) async {
     switch (type) {
       case StorageType.image:
         if (isLocal) {
@@ -217,8 +224,12 @@ class StorageProvider {
       bool showProgress = false}) async {
     _context = context ?? _context;
     _showProgress = showProgress;
-    if (await selectAssets(isGallery: isGallery, backgroundColor: backgroundColor, maxImagesCount: maxImagesCount)) {
-      return (await uploadSelectedAssets(path, showProgress: showProgress, context: context));
+    if (await selectAssets(
+        isGallery: isGallery,
+        backgroundColor: backgroundColor,
+        maxImagesCount: maxImagesCount)) {
+      return (await uploadSelectedAssets(path,
+          showProgress: showProgress, context: context));
     } else {
       return <String>[];
     }
@@ -241,15 +252,18 @@ class StorageProvider {
     }
     selectedAssets = (maxImagesCount > 1 && isGallery
         ? await ImagePicker().pickMultiImage()
-        : [await ImagePicker().pickImage(source: isGallery ? ImageSource.gallery : ImageSource.camera)]
-            .map((e) => e!)
-            .toList());
+        : [
+            await ImagePicker().pickImage(
+                source: isGallery ? ImageSource.gallery : ImageSource.camera)
+          ].map((e) => e!).toList());
     return true;
   }
 
   ///Uploads the Assets in [selectedAssets]
   Future<List<String>> uploadSelectedAssets(String path,
-      {List<XFile>? selectedImages, BuildContext? context, bool showProgress = false}) async {
+      {List<XFile>? selectedImages,
+      BuildContext? context,
+      bool showProgress = false}) async {
     _context = context ?? _context;
     _showProgress = showProgress;
     for (var imageFile in selectedImages ?? selectedAssets!) {
