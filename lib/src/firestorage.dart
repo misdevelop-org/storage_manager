@@ -16,7 +16,7 @@ import 'package:storage_manager/src/repository.dart';
 /// - Facilitates upload progress indicator as Flash Bar
 class FireUploader implements Repository {
   ///Uploads the selected bytes and returns file link
-  /// Supports the extension format
+  /// Supports the extension format, if not set, will be set to application/octet-stream (bytes)
   ///
   /// * [bool] __showProgress__: if true, shows upload progress indicator and MUST set the [context]
   ///

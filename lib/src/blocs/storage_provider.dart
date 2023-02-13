@@ -41,24 +41,18 @@ class StorageProvider {
     }
     if (value is Map<String, dynamic>) {
       return await FireUploader().saveObject(path, jsonEncode(value),
-          extensionFormat: extensionFormat,
-          fileName: fileName,
-          showProgress: showProgress,
-          context: context);
+          extensionFormat: extensionFormat, fileName: fileName, showProgress: showProgress, context: context);
     }
 
     return await FireUploader().saveObject(path, value,
-        extensionFormat: extensionFormat,
-        fileName: fileName,
-        showProgress: showProgress,
-        context: context);
+        extensionFormat: extensionFormat, fileName: fileName, showProgress: showProgress, context: context);
   }
 
-  ///Uploads the selected Asset and returns file link
-  Future<String> saveImage(XFile imageFile, String path) async {
+  ///Uploads the selected Asset as XFile and returns file link
+  Future<String> saveImage(XFile imageFile, String path, {String? extensionFormat}) async {
     var byteData = await imageFile.readAsBytes();
     String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-    Reference reference = FirebaseStorage.instance.ref(path + fileName);
+    Reference reference = FirebaseStorage.instance.ref(path + fileName + (extensionFormat ?? ""));
     UploadTask uploadTask = reference.putData(byteData.buffer.asUint8List());
     if (_showProgress) {
       if (_context == null) {
@@ -187,8 +181,7 @@ class StorageProvider {
   }
 
   ///Get object from storage or local
-  Future<dynamic> get(String path,
-      {bool isLocal = false, StorageType type = StorageType.string}) async {
+  Future<dynamic> get(String path, {bool isLocal = false, StorageType type = StorageType.string}) async {
     switch (type) {
       case StorageType.image:
         if (isLocal) {
@@ -221,15 +214,13 @@ class StorageProvider {
       Color? backgroundColor = Colors.transparent,
       int maxImagesCount = 10,
       BuildContext? context,
+      String? extensionFormat,
       bool showProgress = false}) async {
     _context = context ?? _context;
     _showProgress = showProgress;
-    if (await selectAssets(
-        isGallery: isGallery,
-        backgroundColor: backgroundColor,
-        maxImagesCount: maxImagesCount)) {
+    if (await selectAssets(isGallery: isGallery, backgroundColor: backgroundColor, maxImagesCount: maxImagesCount)) {
       return (await uploadSelectedAssets(path,
-          showProgress: showProgress, context: context));
+          extensionFormat: extensionFormat, showProgress: showProgress, context: context));
     } else {
       return <String>[];
     }
@@ -252,22 +243,20 @@ class StorageProvider {
     }
     selectedAssets = (maxImagesCount > 1 && isGallery
         ? await ImagePicker().pickMultiImage()
-        : [
-            await ImagePicker().pickImage(
-                source: isGallery ? ImageSource.gallery : ImageSource.camera)
-          ].map((e) => e!).toList());
+        : [await ImagePicker().pickImage(source: isGallery ? ImageSource.gallery : ImageSource.camera)]
+            .map((e) => e!)
+            .toList());
     return true;
   }
 
   ///Uploads the Assets in [selectedAssets]
   Future<List<String>> uploadSelectedAssets(String path,
-      {List<XFile>? selectedImages,
-      BuildContext? context,
-      bool showProgress = false}) async {
+      {List<XFile>? selectedImages, BuildContext? context, String? extensionFormat, bool showProgress = false}) async {
     _context = context ?? _context;
     _showProgress = showProgress;
+    links = <String>[];
     for (var imageFile in selectedImages ?? selectedAssets!) {
-      links.add((await saveImage(imageFile, path)));
+      links.add((await saveImage(imageFile, path, extensionFormat: extensionFormat)));
     }
     return links;
   }
