@@ -1,3 +1,6 @@
+## 0.2.5
+Fixed 'extensionFormat' parameter in save() function
+
 ## 0.2.4
 Web support added
 
