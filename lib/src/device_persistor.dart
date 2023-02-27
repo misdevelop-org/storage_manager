@@ -35,7 +35,10 @@ class DataPersistor implements Repository {
   }
 
   /// Gets media bytes with given [path] as String
-  Future<Uint8List> getImage(String path) async {
+  Future<Uint8List> getImage(String path) async => getBytes(path);
+
+  /// Gets media bytes with given [path] as String
+  Future<Uint8List> getBytes(String path) async {
     final prefs = await SharedPreferences.getInstance();
     final base64Image = prefs.getString(path);
     if (base64Image != null) return const Base64Decoder().convert(base64Image);

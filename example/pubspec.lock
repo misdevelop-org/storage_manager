@@ -395,7 +395,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "0.2.4"
+    version: "0.2.5"
   stream_channel:
     dependency: transitive
     description:
@@ -461,5 +461,5 @@ packages:
     source: hosted
     version: "0.2.0+3"
 sdks:
-  dart: ">=2.18.0 <4.0.0"
+  dart: ">=2.18.0 <3.0.0"
   flutter: ">=3.4.0"
