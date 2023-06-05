@@ -1,3 +1,7 @@
+## 0.3.0
+- Added support for upload and download of video and image files
+- Upgraded to dart 3.0
+
 ## 0.2.5
 Fixed 'extensionFormat' parameter in save() function
 

@@ -180,9 +180,9 @@ class _ProgressFromUploadTaskState extends State<ProgressFromUploadTask> {
             decoration: BoxDecoration(
                 color: Colors.green[700],
                 borderRadius: BorderRadius.circular(20)),
-            child: Row(
+            child: const Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
+              children: [
                 Icon(
                   Icons.done,
                   size: 30,

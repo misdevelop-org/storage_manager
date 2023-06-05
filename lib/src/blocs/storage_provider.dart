@@ -31,7 +31,7 @@ class StorageProvider {
         case Uint8List:
           DataPersistor().saveImage(path, value as Uint8List);
           return path;
-        case List<int>:
+        case const (List<int>):
           DataPersistor().saveImage(path, value as Uint8List);
           return path;
         default:
@@ -41,29 +41,40 @@ class StorageProvider {
     }
     if (value is Map<String, dynamic>) {
       return await FireUploader().saveObject(path, jsonEncode(value),
-          extensionFormat: extensionFormat, fileName: fileName, showProgress: showProgress, context: context);
+          extensionFormat: extensionFormat,
+          fileName: fileName,
+          showProgress: showProgress,
+          context: context);
     }
 
     return await FireUploader().saveObject(path, value,
-        extensionFormat: extensionFormat, fileName: fileName, showProgress: showProgress, context: context);
+        extensionFormat: extensionFormat,
+        fileName: fileName,
+        showProgress: showProgress,
+        context: context);
   }
 
   ///Uploads the selected image as XFile and returns file link
   /// Default extension format is png
-  Future<String> saveImage(XFile imageFile, String path, {String? extensionFormat = '.png'}) async =>
+  Future<String> saveImage(XFile imageFile, String path,
+          {String? extensionFormat = '.png'}) async =>
       saveBytes(imageFile, path, extensionFormat: extensionFormat);
 
   /// Uploads the selected video as XFile and returns file link
   /// Default extension format is mp4
-  Future<String> saveVideo(XFile videoFile, String path, {String? extensionFormat = '.mp4'}) async =>
+  Future<String> saveVideo(XFile videoFile, String path,
+          {String? extensionFormat = '.mp4'}) async =>
       saveBytes(videoFile, path, extensionFormat: extensionFormat);
 
   /// Uploads the selected Asset as XFile and returns file link
-  Future<String> saveBytes(XFile imageFile, String path, {String? extensionFormat}) async {
+  Future<String> saveBytes(XFile imageFile, String path,
+      {String? extensionFormat}) async {
     var byteData = await imageFile.readAsBytes();
     final name = imageFile.name.split('.').first;
-    String fileName = '$name-${DateTime.now().millisecondsSinceEpoch.toString()}';
-    Reference reference = FirebaseStorage.instance.ref(path + fileName + (extensionFormat ?? ""));
+    String fileName =
+        '$name-${DateTime.now().millisecondsSinceEpoch.toString()}';
+    Reference reference =
+        FirebaseStorage.instance.ref(path + fileName + (extensionFormat ?? ""));
     UploadTask uploadTask = reference.putData(byteData.buffer.asUint8List());
     if (_showProgress) {
       if (_context == null) {
@@ -192,7 +203,8 @@ class StorageProvider {
   }
 
   ///Get object from storage or local
-  Future<dynamic> get(String path, {bool isLocal = false, StorageType type = StorageType.string}) async {
+  Future<dynamic> get(String path,
+      {bool isLocal = false, StorageType type = StorageType.string}) async {
     switch (type) {
       case StorageType.image:
         if (isLocal) {
@@ -237,9 +249,15 @@ class StorageProvider {
     _context = context ?? _context;
     _showProgress = showProgress;
     if (await selectAssets(
-        isGallery: isGallery, isVideo: isVideo, backgroundColor: backgroundColor, maxImagesCount: maxImagesCount)) {
+        isGallery: isGallery,
+        isVideo: isVideo,
+        backgroundColor: backgroundColor,
+        maxImagesCount: maxImagesCount)) {
       return (await uploadSelectedAssets(path,
-          isVideo: isVideo, extensionFormat: extensionFormat, showProgress: showProgress, context: context));
+          isVideo: isVideo,
+          extensionFormat: extensionFormat,
+          showProgress: showProgress,
+          context: context));
     } else {
       return <String>[];
     }
@@ -288,7 +306,8 @@ class StorageProvider {
     for (var imageFile in selectedImages ?? selectedAssets!) {
       links.add((isVideo
           ? await saveVideo(imageFile, path, extensionFormat: extensionFormat)
-          : await saveImage(imageFile, path, extensionFormat: extensionFormat)));
+          : await saveImage(imageFile, path,
+              extensionFormat: extensionFormat)));
     }
     return links;
   }
