@@ -15,41 +15,93 @@ import 'package:storage_manager/storage_manager.dart';
 
 ## Usage  
 
-### Save (upload), get (download) and remove (delete) 
-  
-#### Upload an Object (image, string, json or bytes) to given path  
+### Save (upload), get (download) and remove (delete) a file from storage
+
+#### This package can save and get images, text and data to device local storage 
+#### (shared_preferences) or Firebase Cloud Storage (firebase_storage) using the latest dependencies
+
+#### Upload a file (image, string, json or bytes) to given a path
   
 ```dart  
-  String url = await StorageProvider.i.save('collectionName/Image.png', image);  
+  String url = await StorageProvider.save('collectionName/Image.png', image);  
 ```
 
-#### Get images, text and data to device persistor
-
+#### Get a file (image, string, json or bytes) from given a path  
+  
 ```dart  
-  var imageBytes = await StorageProvider.i.get('collectionName/Image.png');  
+  var file = await StorageProvider.get('collectionName/Image.png');  
 ```  
+
+#### Get an image from given a path  
+  
+```dart  
+  Uint8List? image = await StorageProvider.getImage('collectionName/Image.png');  
+```
+
+#### Get a video from given a path  
+  
+```dart  
+  Uint8List? video = await StorageProvider.getVideo('collectionName/Video.mp4');  
+```
+
+#### Get a string from given a path  
+  
+```dart  
+  String? text = await StorageProvider.getText('collectionName/text.txt');  
+```
 
 #### Remove files from storage or local path  
   
 ```dart  
-  bool removed = await StorageProvider.i.remove('collectionName/Image.png');  
+  bool removed = await StorageProvider.remove('collectionName/Image.png');  
 ```
 
 or from storage URL  
   
 ```dart  
-  bool success = await StorageProvider.i.removeUrl('url');  
+  bool success = await StorageProvider.removeUrl('url');  
 ```  
-  
-  
-  
+
+
+#### Only the save method can save to local storage using the [toLocalStorage] parameter
+#### the [value] parameter can be a [String], [Uint8List], [File], [JSON] or [XFile] (image_picker)
+#### and the [fileName] parameter is the name of the file to be saved
+
+```dart  
+  StorageProvider.save('/images/[fileName]', image, toLocalStorage: true);  
+```
+
+#### You can also save and Image directly to local storage using:
+    
+    ```dart  
+    StorageProvider.saveLocalImage('/images/[fileName]', image);  
+    ```
+
+#### or a Video directly to local storage using:
+    
+    ```dart  
+    StorageProvider.saveLocalVideo('/videos/[fileName]', video);  
+    ```
+
+#### or a String directly to local storage using:
+    
+    ```dart
+    StorageProvider.saveLocalText('/texts/[fileName]', text);  
+    ```
+
+#### or a JSON directly to local storage using:
+    
+    ```dart
+    StorageProvider.saveLocalJson('/jsons/[fileName]', json);  
+    ```
+
 ### Integrated image picker feature
 
 #### Select images from gallery or camera
 
 ```dart  
-   if(await StorageProvider.i.selectImages()){
-        List<XFile> images =  StorageProvider.i.selectedAssets;
+   if(await StorageProvider.selectImages()){
+        List<XFile> images =  StorageProvider.selectedAssets;
    }else{
         print('User cancelled selection');
    }
@@ -58,13 +110,13 @@ or from storage URL
 
 ```dart  
     /// You can use the selectedAssets from the previous step or select new ones with image_picker
-    List<XFile> images = StorageProvider.i.selectedAssets;
-    List<String> urls = await StorageProvider.i.save('collectionName', images);  
+    List<XFile> images = StorageProvider.selectedAssets;
+    List<String> urls = await StorageProvider.save('collectionName', images);  
 ```
 #### Select images from gallery and upload them
 
 ```dart  
-  String url = await StorageProvider.i.selectAndUpload();  
+  String url = await StorageProvider.selectAndUpload();  
 ```  
 
 

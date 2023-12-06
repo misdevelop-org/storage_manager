@@ -1,8 +1,13 @@
-import 'package:firebase_storage/firebase_storage.dart';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:storage_manager/storage_manager.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  //Configure default firebase app
+
   runApp(const MyApp());
 }
 
@@ -32,7 +37,7 @@ class _MyHomePageState extends State<MyHomePage> {
   List<String> links = [];
 
   ///Final path where the files will be saved
-  String path = "";
+  String path = "/images";
 
   ///MUST set the [context] if true
   bool showProgress = false;
@@ -44,180 +49,142 @@ class _MyHomePageState extends State<MyHomePage> {
   ///Restrict the gallery selection
   int maxImagesCount = 10;
 
-  ///Uploads the selected Asset and returns file link
-  Future<String> saveImage(XFile imageFile) async {
-    var byteData = await imageFile.readAsBytes();
-    String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-    Reference reference = FirebaseStorage.instance.ref(path + fileName);
-    UploadTask uploadTask = reference.putData(byteData.buffer.asUint8List());
-    // if (showProgress) {
-    //   await showDataUploadProgress(context!, uploadTask);
-    // }
-    TaskSnapshot storageTaskSnapshot = await uploadTask.whenComplete(() {});
-    String link = await storageTaskSnapshot.ref.getDownloadURL();
-    return link;
-  }
-
-  ///Let the default showModalBottomSheet get the source from user
-  Future<bool?> getSource({Color? backgroundColor = Colors.transparent}) async {
-    return await showModalBottomSheet<bool?>(
-      context: context,
-      backgroundColor: backgroundColor,
-      builder: (BuildContext context) {
-        double size = 80;
-        double iconSize = 30;
-        return SizedBox(
-          height: 160 + MediaQuery.of(context).viewPadding.bottom,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              SizedBox(
-                height: size,
-                width: 150,
-                child: TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(false);
-                  },
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Container(
-                              height: size,
-                              width: size,
-                              decoration: BoxDecoration(
-                                color: Colors.lightBlue[700],
-                                shape: BoxShape.circle,
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Icon(
-                                  Icons.camera,
-                                  size: iconSize,
-                                  color: Colors.white,
-                                ),
-                              )),
-                        ),
-                        const Text(
-                          "Camera",
-                          style: TextStyle(color: Colors.white, fontSize: 24),
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-              ), //Camera
-              SizedBox(
-                height: size,
-                width: 150,
-                child: TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(true);
-                  },
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Container(
-                              height: size,
-                              width: size,
-                              decoration: BoxDecoration(
-                                color: Colors.blue[900],
-                                shape: BoxShape.circle,
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Icon(
-                                  Icons.photo,
-                                  size: iconSize,
-                                  color: Colors.white,
-                                ),
-                              )),
-                        ),
-                        const Text(
-                          "Gallery",
-                          style: TextStyle(color: Colors.white, fontSize: 24),
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-              ), //Gallery
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  ///Select assets from gallery or camera and returns the uploaded file paths
-  ///Select gallery as source by setting [isGallery] to true
-  ///Select camera as source by setting [isGallery] to false
-  ///Let the default showModalBottomSheet get the source from user by setting [isGallery] to null
-  /// [isGallery] defaults to null
-  Future<List<String>> selectAndUpload(
-      {bool? isGallery, Color? backgroundColor = Colors.transparent}) async {
-    if (await selectAssets(
-        isGallery: isGallery, backgroundColor: backgroundColor)) {
-      return (await uploadSelectedAssets());
-    } else {
-      return <String>[];
-    }
-  }
-
-  ///Select assets from gallery or camera and stores the Assets in the variable [selectedAssets]
-  ///Select gallery as source by setting [isGallery] to true
-  ///Select camera as source by setting [isGallery] to false
-  ///Let the default showModalBottomSheet get the source from user by setting [isGallery] to null
-  /// [isGallery] defaults to null
-  Future<bool> selectAssets(
-      {bool? isGallery, Color? backgroundColor = Colors.transparent}) async {
-    isGallery ??= await getSource(backgroundColor: backgroundColor);
-    if (isGallery == null) {
-      return false;
-    }
-    selectedAssets = (maxImagesCount > 1 && isGallery
-        ? await ImagePicker().pickMultiImage()
-        : [
-            await ImagePicker().pickImage(
-                source: isGallery ? ImageSource.gallery : ImageSource.camera)
-          ].map((e) => e!).toList());
-    return true;
-  }
-
-  ///Uploads the Assets in [selectedAssets]
-  Future<List<String>> uploadSelectedAssets() async {
-    for (var imageFile in selectedAssets!) {
-      links.add((await saveImage(imageFile)));
-    }
-    return links;
-  }
-
   @override
   Widget build(BuildContext context) {
+    // You can set the context here or on each method call
+    StorageProvider.context = context;
+
+    // You can set the ImageSource get function to have a custom implementation
+    StorageProvider.getImageSource = () async {
+      return await showDialog<ImageSource>(
+        context: context,
+        builder: (context) => SimpleDialog(
+          title: const Text("Select image source"),
+          children: [
+            ListTile(
+              title: const Text("Camera"),
+              leading: const Icon(Icons.camera_alt),
+              onTap: () => Navigator.pop(context, ImageSource.camera),
+            ),
+            ListTile(
+              title: const Text("Gallery"),
+              leading: const Icon(Icons.photo),
+              onTap: () => Navigator.pop(context, ImageSource.gallery),
+            ),
+          ],
+        ),
+      );
+    };
+
+    // You can set the upload progress dialog by utilizing the [UploadTask] stream
+    // StorageProvider.customUploadProgressIndicator = (uploadTask) async {
+    //   return await showDialog(
+    //     context: context,
+    //     barrierDismissible: true,
+    //     builder: (context) {
+    //       return StreamBuilder<TaskSnapshot>(
+    //         stream: uploadTask.snapshotEvents,
+    //         builder: (context, snapshot) {
+    //           if (snapshot.hasData) {
+    //             return AlertDialog(
+    //                 title: const Text('Uploading...'),
+    //                 content: ProgressFromUploadTask(
+    //                   task: uploadTask,
+    //                   onDone: () {
+    //                     Navigator.pop(context);
+    //                   },
+    //                 ));
+    //           } else {
+    //             return const AlertDialog(
+    //               title: Text('Waiting...'),
+    //               content: LinearProgressIndicator(),
+    //             );
+    //           }
+    //         },
+    //       );
+    //     },
+    //   );
+    // };
     return Scaffold(
+      backgroundColor: Colors.grey[900],
       appBar: AppBar(
         title: Text(widget.title),
       ),
       body: ListView(
-        children: links
-            .map((e) => Card(
-                  child: ListTile(title: Text(e)),
-                ))
-            .toList(),
+        children: [
+          const SizedBox(height: 20),
+          const Text("Selected files", style: TextStyle(color: Colors.white), textAlign: TextAlign.center),
+          ...selectedAssets
+                  ?.map((e) => Card(
+                        child: ListTile(
+                          title: Text(e.path),
+                          leading: Image.file(
+                            File(e.path),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ))
+                  .toList() ??
+              [],
+          const SizedBox(height: 20),
+          const Divider(),
+          const Text("Uploaded files links", style: TextStyle(color: Colors.white), textAlign: TextAlign.center),
+          ...links
+              .map((e) => Card(
+                    child: ListTile(title: Text(e)),
+                  ))
+              .toList()
+        ],
       ),
-      floatingActionButton: Card(
-        color: Colors.purple[900],
-        child: TextButton(
-          child: const Text("Select and upload images"),
-          onPressed: () {}
-          // () async => links = await FireUploader(context: context, path: 'test/images/').selectAndUpload()
-          ,
-        ),
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepPurple,
+              ),
+              child: const Text("Select images", style: TextStyle(color: Colors.white)),
+              onPressed: () async {
+                await StorageProvider.selectAssets(backgroundColor: Colors.grey[900]!);
+                setState(() {
+                  selectedAssets = StorageProvider.selectedAssets;
+                });
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepPurple,
+              ),
+              child: const Text("Upload selected images", style: TextStyle(color: Colors.white)),
+              onPressed: () async {
+                await StorageProvider.uploadSelectedAssets(path);
+                setState(() {
+                  links = StorageProvider.links;
+                });
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepPurple,
+              ),
+              child: const Text("Select and upload images", style: TextStyle(color: Colors.white)),
+              onPressed: () async {
+                await StorageProvider.selectAndUpload(path);
+                setState(() {
+                  links = StorageProvider.links;
+                });
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
