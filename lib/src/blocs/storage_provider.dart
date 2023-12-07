@@ -38,7 +38,7 @@ class StorageProvider {
     }
   }
 
-  // Get image from storage or local
+  /// Get image from storage or local
   static Future<Uint8List?> getImage(String path, {bool isLocal = false}) async {
     if (isLocal) {
       return DataPersistor().getImage(path);
@@ -47,7 +47,7 @@ class StorageProvider {
     }
   }
 
-  // Get video from storage or local
+  /// Get video from storage or local
   static Future<Uint8List?> getVideo(String path, {bool isLocal = false}) async {
     if (isLocal) {
       return DataPersistor().getBytes(path);
@@ -56,7 +56,7 @@ class StorageProvider {
     }
   }
 
-  // Get string from storage or local
+  /// Get string from storage or local
   static Future<String?> getString(String path, {bool isLocal = false}) async {
     if (isLocal) {
       return DataPersistor().getString(path);
@@ -65,7 +65,7 @@ class StorageProvider {
     }
   }
 
-  // Get json from storage or local
+  /// Get json from storage or local
   static Future<Map<String, dynamic>?> getJson(String path, {bool isLocal = false}) async {
     if (isLocal) {
       return DataPersistor().getObject(path);
@@ -280,10 +280,17 @@ class StorageProvider {
     await FireUploader().removeObjectFromUrl(url);
   }
 
-  ///Select assets from gallery or camera and returns the uploaded file paths
-  ///Select gallery or camara as [source] by using [ImageSource]
-  ///Let the default showModalBottomSheet get the source from user by setting [source] to null
-  /// [source] defaults to null
+  ///## Select assets from gallery or camera and stores them in the variable [selectedAssets].
+  ///* Select gallery or camera as [source] by using [ImageSource].
+  ///* Let the default [showModalBottomSheet] get the source from user by setting [source] to null.
+  ///* You can set [showProgress] to show upload progress indicator.
+  ///
+  ///## You must set the [context] if [source] is null or [showProgress] is true.
+  ///* When context is required, can be set using [StorageProvider.context] or passing directly to the function.
+  ///
+  ///## Customization
+  ///* You can set the ImageSource get function to have a custom implementation
+  ///* You can set the upload progress indicator to have a custom implementation
   static Future<List<String>> selectAndUpload(
     String path, {
     ImageSource? source,
@@ -311,6 +318,9 @@ class StorageProvider {
   ///
   ///## You must set the [context] if [source] is null.
   ///* When context is required, can be set using [StorageProvider.context] or passing directly to the function.
+  ///
+  ///## Customization
+  ///* You can set the ImageSource get function to have a custom implementation
   static Future<bool> selectAssets({
     bool isVideo = false,
     ImageSource? source,
@@ -342,7 +352,14 @@ class StorageProvider {
     return selectedAssets!.isNotEmpty;
   }
 
-  ///Uploads the Assets in [selectedAssets]
+  ///## Upload the [selectedAssets] to the given [path].
+  ///* You can set [showProgress] to show upload progress indicator.
+  ///
+  ///## You must set the [context] if [showProgress] is true.
+  ///* When context is required, can be set using [StorageProvider.context] or passing directly to the function.
+  ///
+  ///## Customization
+  ///* You can set the upload progress indicator to have a custom implementation
   static Future<List<String>> uploadSelectedAssets(String path,
       {List<XFile>? selectedImages,
       BuildContext? context,
@@ -354,9 +371,10 @@ class StorageProvider {
     if (selectedImages != null) links = <String>[];
     for (var imageFile in selectedImages ?? selectedAssets!) {
       links.add((isVideo
-          ? await saveVideo(imageFile, path, extensionFormat: extensionFormat)
-          : await saveImage(imageFile, path, extensionFormat: extensionFormat)));
+          ? await saveVideo(imageFile, path, extensionFormat: extensionFormat ?? '.mp4')
+          : await saveImage(imageFile, path, extensionFormat: extensionFormat ?? '.png')));
     }
+    selectedAssets?.clear();
     return links;
   }
 

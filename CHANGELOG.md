@@ -1,3 +1,8 @@
+## 0.4.0
+- Added customizations for image source picker and upload progress indicator
+- Improved docs and added functions
+- Upgraded to dart 3.2 and flutter 3.16
+
 ## 0.3.0
 - Added support for upload and download of video and image files
 - Upgraded to dart 3.0

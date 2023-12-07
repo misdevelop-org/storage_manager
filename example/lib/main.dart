@@ -1,5 +1,7 @@
-import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:example/firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:storage_manager/storage_manager.dart';
@@ -7,7 +9,7 @@ import 'package:storage_manager/storage_manager.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   //Configure default firebase app
-
+  Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
 
@@ -37,7 +39,7 @@ class _MyHomePageState extends State<MyHomePage> {
   List<String> links = [];
 
   ///Final path where the files will be saved
-  String path = "/images";
+  String path = "/images/";
 
   ///MUST set the [context] if true
   bool showProgress = false;
@@ -55,26 +57,24 @@ class _MyHomePageState extends State<MyHomePage> {
     StorageProvider.context = context;
 
     // You can set the ImageSource get function to have a custom implementation
-    StorageProvider.getImageSource = () async {
-      return await showDialog<ImageSource>(
-        context: context,
-        builder: (context) => SimpleDialog(
-          title: const Text("Select image source"),
-          children: [
-            ListTile(
-              title: const Text("Camera"),
-              leading: const Icon(Icons.camera_alt),
-              onTap: () => Navigator.pop(context, ImageSource.camera),
-            ),
-            ListTile(
-              title: const Text("Gallery"),
-              leading: const Icon(Icons.photo),
-              onTap: () => Navigator.pop(context, ImageSource.gallery),
-            ),
-          ],
-        ),
-      );
-    };
+    StorageProvider.getImageSource = () async => await showDialog<ImageSource>(
+          context: context,
+          builder: (context) => SimpleDialog(
+            title: const Text("Select image source"),
+            children: [
+              ListTile(
+                title: const Text("Camera"),
+                leading: const Icon(Icons.camera_alt),
+                onTap: () => Navigator.pop(context, ImageSource.camera),
+              ),
+              ListTile(
+                title: const Text("Gallery"),
+                leading: const Icon(Icons.photo),
+                onTap: () => Navigator.pop(context, ImageSource.gallery),
+              ),
+            ],
+          ),
+        );
 
     // You can set the upload progress dialog by utilizing the [UploadTask] stream
     // StorageProvider.customUploadProgressIndicator = (uploadTask) async {
@@ -112,28 +112,77 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: ListView(
         children: [
-          const SizedBox(height: 20),
-          const Text("Selected files", style: TextStyle(color: Colors.white), textAlign: TextAlign.center),
-          ...selectedAssets
-                  ?.map((e) => Card(
-                        child: ListTile(
-                          title: Text(e.path),
-                          leading: Image.file(
-                            File(e.path),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ))
-                  .toList() ??
-              [],
-          const SizedBox(height: 20),
-          const Divider(),
-          const Text("Uploaded files links", style: TextStyle(color: Colors.white), textAlign: TextAlign.center),
-          ...links
-              .map((e) => Card(
-                    child: ListTile(title: Text(e)),
-                  ))
-              .toList()
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 20,
+            runSpacing: 20,
+            children: [
+              SizedBox(
+                width: 500,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(height: 20),
+                    const Text("Selected files",
+                        style: TextStyle(color: Colors.white),
+                        textAlign: TextAlign.center),
+                    ...selectedAssets
+                            ?.map((e) => Card(
+                                  child: ListTile(
+                                    title: Text(e.path),
+                                    subtitle: SizedBox(
+                                      width: 400,
+                                      height: 400,
+                                      child: FutureBuilder(
+                                        builder: (context, snapshot) {
+                                          if (!snapshot.hasData) {
+                                            return const CircularProgressIndicator();
+                                          }
+                                          return Image.memory(
+                                            snapshot.data as Uint8List,
+                                            fit: BoxFit.contain,
+                                          );
+                                        },
+                                        future: e.readAsBytes(),
+                                      ),
+                                    ),
+                                  ),
+                                ))
+                            .toList() ??
+                        [],
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+              SizedBox(
+                width: 500,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(height: 20),
+                    const Text("Uploaded files links",
+                        style: TextStyle(color: Colors.white),
+                        textAlign: TextAlign.center),
+                    ...links
+                        .map((e) => Card(
+                              child: ListTile(
+                                title: Text(e),
+                                subtitle: Image.network(
+                                  e,
+                                  // imageUrl: e,
+                                  width: 400,
+                                  height: 400,
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
+                            ))
+                        .toList(),
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              )
+            ],
+          ),
         ],
       ),
       floatingActionButton: Column(
@@ -145,9 +194,11 @@ class _MyHomePageState extends State<MyHomePage> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.deepPurple,
               ),
-              child: const Text("Select images", style: TextStyle(color: Colors.white)),
+              child: const Text("Select images",
+                  style: TextStyle(color: Colors.white)),
               onPressed: () async {
-                await StorageProvider.selectAssets(backgroundColor: Colors.grey[900]!);
+                await StorageProvider.selectAssets(
+                    backgroundColor: Colors.grey[900]!);
                 setState(() {
                   selectedAssets = StorageProvider.selectedAssets;
                 });
@@ -160,12 +211,13 @@ class _MyHomePageState extends State<MyHomePage> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.deepPurple,
               ),
-              child: const Text("Upload selected images", style: TextStyle(color: Colors.white)),
+              child: const Text("Upload selected images",
+                  style: TextStyle(color: Colors.white)),
               onPressed: () async {
-                await StorageProvider.uploadSelectedAssets(path);
-                setState(() {
-                  links = StorageProvider.links;
-                });
+                // You can set the [links] variable directly
+                links = await StorageProvider.uploadSelectedAssets(path,
+                    context: context, showProgress: true);
+                setState(() {});
               },
             ),
           ),
@@ -175,8 +227,10 @@ class _MyHomePageState extends State<MyHomePage> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.deepPurple,
               ),
-              child: const Text("Select and upload images", style: TextStyle(color: Colors.white)),
+              child: const Text("Select and upload images",
+                  style: TextStyle(color: Colors.white)),
               onPressed: () async {
+                //Or you can use the provider's stored value
                 await StorageProvider.selectAndUpload(path);
                 setState(() {
                   links = StorageProvider.links;
