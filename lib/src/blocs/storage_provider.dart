@@ -38,10 +38,30 @@ class StorageProvider {
     }
   }
 
+  /// Get image from local storage
+  static Future<Uint8List?> getLocalImage(String path) async {
+    return DataPersistor().getImage(path);
+  }
+
+  /// Get video from local storage
+  static Future<Uint8List?> getLocalVideo(String path) async {
+    return DataPersistor().getBytes(path);
+  }
+
+  /// Get string from local storage
+  static Future<String?> getLocalString(String path) async {
+    return DataPersistor().getString(path);
+  }
+
+  /// Get json from local storage
+  static Future<Map<String, dynamic>?> getLocalJson(String path) async {
+    return DataPersistor().getObject(path);
+  }
+
   /// Get image from storage or local
   static Future<Uint8List?> getImage(String path, {bool isLocal = false}) async {
     if (isLocal) {
-      return DataPersistor().getImage(path);
+      return getLocalImage(path);
     } else {
       return await FireUploader().getObject(path);
     }
@@ -50,7 +70,7 @@ class StorageProvider {
   /// Get video from storage or local
   static Future<Uint8List?> getVideo(String path, {bool isLocal = false}) async {
     if (isLocal) {
-      return DataPersistor().getBytes(path);
+      return getLocalVideo(path);
     } else {
       return await FireUploader().getObject(path);
     }
@@ -59,7 +79,7 @@ class StorageProvider {
   /// Get string from storage or local
   static Future<String?> getString(String path, {bool isLocal = false}) async {
     if (isLocal) {
-      return DataPersistor().getString(path);
+      return getLocalString(path);
     } else {
       return await FireUploader().getObject(path) as String;
     }
@@ -68,7 +88,7 @@ class StorageProvider {
   /// Get json from storage or local
   static Future<Map<String, dynamic>?> getJson(String path, {bool isLocal = false}) async {
     if (isLocal) {
-      return DataPersistor().getObject(path);
+      return getLocalJson(path);
     } else {
       return jsonDecode(await FireUploader().getObject(path) as String);
     }
@@ -390,6 +410,18 @@ class StorageProvider {
   /// You can set the upload progress indicator to have a custom implementation
   static set customUploadProgressIndicator(Future<void> Function(UploadTask uploadTask)? showDataUploadProgress) =>
       instance._showDataUploadProgress = showDataUploadProgress;
+
+  static void configure({
+    BuildContext? context,
+    bool showProgress = false,
+    Future<ImageSource?> Function()? getImageSource,
+    Future<void> Function(UploadTask uploadTask)? showDataUploadProgress,
+  }) {
+    instance._context = context;
+    instance._getImageSource = getImageSource;
+    instance._showDataUploadProgress = showDataUploadProgress;
+    instance._showProgress = showProgress;
+  }
 
   static final StorageProvider instance = StorageProvider._internal();
   static StorageProvider get i => instance;

@@ -1,3 +1,7 @@
+## 0.4.1
+- Added local storage methods.
+- Improved docs and added functions.
+
 ## 0.4.0
 - Added customizations for image source picker and upload progress indicator
 - Improved docs and added functions

@@ -1,6 +1,6 @@
 name: storage_manager
 description: FireStorage & DevicePersistor Manager facilitates quick implementation in your app
-version: 0.4.0
+version: 0.4.1
 homepage: https://github.com/misdevelop-org/storage_manager
 
 environment:

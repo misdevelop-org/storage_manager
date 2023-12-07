@@ -43,6 +43,30 @@ import 'package:storage_manager/storage_manager.dart';
   String? text = await StorageProvider.getText('collectionName/text.txt');  
 ```
 
+#### To get an image from local storage use:
+
+```dart  
+  final file = await StorageProvider.getLocalImage('collectionName/Image.png');  
+``` 
+
+#### To get a video from local storage use:
+
+```dart  
+  final file = await StorageProvider.getLocalVideo('collectionName/Video.mp4');  
+```
+
+#### To get a string from local storage use:
+
+```dart  
+  final file = await StorageProvider.getLocalText('collectionName/text.txt');  
+```
+
+#### To get a JSON from local storage use:
+
+```dart  
+  final file = await StorageProvider.getLocalJson('collectionName/json.json');  
+```
+
 ## Remove methods
 
 #### Remove files from storage or local path
@@ -66,35 +90,53 @@ or from storage URL
   StorageProvider.save('/images/image.png', value, toLocalStorage: true);  
 ```
 
-#### Upload a file (image, video, string, json or bytes) to given a path
+#### Upload a dynamic file (image, video, string, json or bytes) to given a path
 
 ```dart  
   String url = await StorageProvider.save('collectionName/Image.png', image);  
 ```
 
+#### Upload an image to given a path
+
+```dart  
+  String url = await StorageProvider.saveImage('collectionName/Image.png', image);  
+```
+
+#### Upload a video to given a path
+
+```dart  
+  String url = await StorageProvider.saveVideo('collectionName/Video.mp4', video);  
+```
+
+#### Upload a JSON to given a path
+
+```dart  
+  String url = await StorageProvider.saveBytes('collectionName/json.json', json);  
+```
+
 #### You can also save and Image directly to local storage using:
 
-    ```dart  
+```dart  
     StorageProvider.saveLocalImage('/images/[fileName]', image);  
-    ```
+```
 
 #### or a Video directly to local storage using:
 
-    ```dart  
+```dart  
     StorageProvider.saveLocalVideo('/videos/[fileName]', video);  
-    ```
+```
 
 #### or a String directly to local storage using:
 
-    ```dart
+```dart
     StorageProvider.saveLocalText('/texts/[fileName]', text);  
-    ```
+```
 
 #### or a JSON directly to local storage using:
 
-    ```dart
+```dart
     StorageProvider.saveLocalJson('/jsons/[fileName]', json);  
-    ```
+```
 
 ## Integrated image picker feature
 
@@ -119,6 +161,62 @@ or from storage URL
 ```dart  
   String url = await StorageProvider.selectAndUpload();  
 ```  
+## Customizations
+
+#### You can customize the image picker getSource function 
+
+```dart  
+  StorageProvider.configure(
+  context: context,
+  showProgress: true,
+  getImageSource: () async => await showDialog<ImageSource>(
+  context: context,
+  builder: (context) => SimpleDialog(
+    title: const Text("Select image source"),
+    children: [
+      ListTile(
+        title: const Text("Camera"),
+        leading: const Icon(Icons.camera_alt),
+        onTap: () => Navigator.pop(context, ImageSource.camera),
+      ),
+      ListTile(
+        title: const Text("Gallery"),
+        leading: const Icon(Icons.photo),
+        onTap: () => Navigator.pop(context, ImageSource.gallery),
+      ),
+    ],
+  ),
+  showDataUploadProgress: (uploadTask) async {
+    return await showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) {
+        return StreamBuilder<TaskSnapshot>(
+          stream: uploadTask.snapshotEvents,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return AlertDialog(
+                title: const Text('Uploading...'),
+                content: ProgressFromUploadTask(
+                  task: uploadTask,
+                  onDone: () {
+                    Navigator.pop(context);
+                  },
+                ),
+              );
+            } else {
+              return const AlertDialog(
+                title: Text('Waiting...'),
+                content: LinearProgressIndicator(),
+              );
+            }
+          },
+        );
+      },
+    );
+  },
+);
+```
 
 ## Rendering images from storage
 
@@ -133,7 +231,7 @@ or from storage URL
 ## Additional information
 
 This package assumes complete Firebase configuration with Storage and permissions.
-We recommend flutterfire to configure your project
+We recommend flutterfire to configure your project. For more information visit: https://firebase.flutter.dev/docs/overview/
 ```shell
     dart pub global activate flutterfire_cli
     flutterfire configure

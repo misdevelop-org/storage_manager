@@ -1,15 +1,16 @@
 import 'dart:typed_data';
 
-import 'package:example/firebase_options.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:storage_manager/storage_manager.dart';
 
+//Import your firebase options file
+//import 'firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   //Configure default firebase app
-  Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  //Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
 
@@ -54,57 +55,57 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     // You can set the context here or on each method call
-    StorageProvider.context = context;
-
-    // You can set the ImageSource get function to have a custom implementation
-    StorageProvider.getImageSource = () async => await showDialog<ImageSource>(
+    StorageProvider.configure(
+      context: context,
+      showProgress: true,
+      getImageSource: () async => await showDialog<ImageSource>(
+        context: context,
+        builder: (context) => SimpleDialog(
+          title: const Text("Select image source"),
+          children: [
+            ListTile(
+              title: const Text("Camera"),
+              leading: const Icon(Icons.camera_alt),
+              onTap: () => Navigator.pop(context, ImageSource.camera),
+            ),
+            ListTile(
+              title: const Text("Gallery"),
+              leading: const Icon(Icons.photo),
+              onTap: () => Navigator.pop(context, ImageSource.gallery),
+            ),
+          ],
+        ),
+      ),
+      showDataUploadProgress: (uploadTask) async {
+        return await showDialog(
           context: context,
-          builder: (context) => SimpleDialog(
-            title: const Text("Select image source"),
-            children: [
-              ListTile(
-                title: const Text("Camera"),
-                leading: const Icon(Icons.camera_alt),
-                onTap: () => Navigator.pop(context, ImageSource.camera),
-              ),
-              ListTile(
-                title: const Text("Gallery"),
-                leading: const Icon(Icons.photo),
-                onTap: () => Navigator.pop(context, ImageSource.gallery),
-              ),
-            ],
-          ),
+          barrierDismissible: true,
+          builder: (context) {
+            return StreamBuilder<TaskSnapshot>(
+              stream: uploadTask.snapshotEvents,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return AlertDialog(
+                      title: const Text('Uploading...'),
+                      content: ProgressFromUploadTask(
+                        task: uploadTask,
+                        onDone: () {
+                          Navigator.pop(context);
+                        },
+                      ));
+                } else {
+                  return const AlertDialog(
+                    title: Text('Waiting...'),
+                    content: LinearProgressIndicator(),
+                  );
+                }
+              },
+            );
+          },
         );
+      },
+    );
 
-    // You can set the upload progress dialog by utilizing the [UploadTask] stream
-    // StorageProvider.customUploadProgressIndicator = (uploadTask) async {
-    //   return await showDialog(
-    //     context: context,
-    //     barrierDismissible: true,
-    //     builder: (context) {
-    //       return StreamBuilder<TaskSnapshot>(
-    //         stream: uploadTask.snapshotEvents,
-    //         builder: (context, snapshot) {
-    //           if (snapshot.hasData) {
-    //             return AlertDialog(
-    //                 title: const Text('Uploading...'),
-    //                 content: ProgressFromUploadTask(
-    //                   task: uploadTask,
-    //                   onDone: () {
-    //                     Navigator.pop(context);
-    //                   },
-    //                 ));
-    //           } else {
-    //             return const AlertDialog(
-    //               title: Text('Waiting...'),
-    //               content: LinearProgressIndicator(),
-    //             );
-    //           }
-    //         },
-    //       );
-    //     },
-    //   );
-    // };
     return Scaffold(
       backgroundColor: Colors.grey[900],
       appBar: AppBar(
@@ -123,9 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const SizedBox(height: 20),
-                    const Text("Selected files",
-                        style: TextStyle(color: Colors.white),
-                        textAlign: TextAlign.center),
+                    const Text("Selected files", style: TextStyle(color: Colors.white), textAlign: TextAlign.center),
                     ...selectedAssets
                             ?.map((e) => Card(
                                   child: ListTile(
@@ -161,8 +160,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   children: [
                     const SizedBox(height: 20),
                     const Text("Uploaded files links",
-                        style: TextStyle(color: Colors.white),
-                        textAlign: TextAlign.center),
+                        style: TextStyle(color: Colors.white), textAlign: TextAlign.center),
                     ...links
                         .map((e) => Card(
                               child: ListTile(
@@ -194,11 +192,9 @@ class _MyHomePageState extends State<MyHomePage> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.deepPurple,
               ),
-              child: const Text("Select images",
-                  style: TextStyle(color: Colors.white)),
+              child: const Text("Select images", style: TextStyle(color: Colors.white)),
               onPressed: () async {
-                await StorageProvider.selectAssets(
-                    backgroundColor: Colors.grey[900]!);
+                await StorageProvider.selectAssets(backgroundColor: Colors.grey[900]!);
                 setState(() {
                   selectedAssets = StorageProvider.selectedAssets;
                 });
@@ -211,12 +207,10 @@ class _MyHomePageState extends State<MyHomePage> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.deepPurple,
               ),
-              child: const Text("Upload selected images",
-                  style: TextStyle(color: Colors.white)),
+              child: const Text("Upload selected images", style: TextStyle(color: Colors.white)),
               onPressed: () async {
                 // You can set the [links] variable directly
-                links = await StorageProvider.uploadSelectedAssets(path,
-                    context: context, showProgress: true);
+                links = await StorageProvider.uploadSelectedAssets(path, context: context, showProgress: true);
                 setState(() {});
               },
             ),
@@ -227,8 +221,7 @@ class _MyHomePageState extends State<MyHomePage> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.deepPurple,
               ),
-              child: const Text("Select and upload images",
-                  style: TextStyle(color: Colors.white)),
+              child: const Text("Select and upload images", style: TextStyle(color: Colors.white)),
               onPressed: () async {
                 //Or you can use the provider's stored value
                 await StorageProvider.selectAndUpload(path);
