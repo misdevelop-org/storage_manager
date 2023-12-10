@@ -25,7 +25,8 @@ class StorageProvider {
   Future<void> Function(UploadTask uploadTask)? _showDataUploadProgress;
 
   ///Get object from storage or local
-  static Future<dynamic> get(String path, {bool isLocal = false, StorageType type = StorageType.string}) async {
+  static Future<dynamic> get(String path,
+      {bool isLocal = false, StorageType type = StorageType.string}) async {
     switch (type) {
       case StorageType.image:
         getImage(path, isLocal: isLocal);
@@ -59,7 +60,8 @@ class StorageProvider {
   }
 
   /// Get image from storage or local
-  static Future<Uint8List?> getImage(String path, {bool isLocal = false}) async {
+  static Future<Uint8List?> getImage(String path,
+      {bool isLocal = false}) async {
     if (isLocal) {
       return getLocalImage(path);
     } else {
@@ -68,7 +70,8 @@ class StorageProvider {
   }
 
   /// Get video from storage or local
-  static Future<Uint8List?> getVideo(String path, {bool isLocal = false}) async {
+  static Future<Uint8List?> getVideo(String path,
+      {bool isLocal = false}) async {
     if (isLocal) {
       return getLocalVideo(path);
     } else {
@@ -86,7 +89,8 @@ class StorageProvider {
   }
 
   /// Get json from storage or local
-  static Future<Map<String, dynamic>?> getJson(String path, {bool isLocal = false}) async {
+  static Future<Map<String, dynamic>?> getJson(String path,
+      {bool isLocal = false}) async {
     if (isLocal) {
       return getLocalJson(path);
     } else {
@@ -122,25 +126,34 @@ class StorageProvider {
     }
     if (value is Map<String, dynamic>) {
       return await FireUploader().saveObject(path, jsonEncode(value),
-          extensionFormat: extensionFormat, fileName: fileName, showProgress: showProgress, context: context);
+          extensionFormat: extensionFormat,
+          fileName: fileName,
+          showProgress: showProgress,
+          context: context);
     }
     return await FireUploader().saveObject(path, value,
-        extensionFormat: extensionFormat, fileName: fileName, showProgress: showProgress, context: context);
+        extensionFormat: extensionFormat,
+        fileName: fileName,
+        showProgress: showProgress,
+        context: context);
   }
 
   ///### Saves the image to local storage
   /// Default extension format is png
-  static Future<String> saveLocalImage(String path, Uint8List imageBytes, {String? extensionFormat = '.png'}) async =>
+  static Future<String> saveLocalImage(String path, Uint8List imageBytes,
+          {String? extensionFormat = '.png'}) async =>
       DataPersistor().saveImage(path, imageBytes);
 
   ///### Saves the video to local storage
   /// Default extension format is mp4
-  static Future<String> saveLocalVideo(String path, Uint8List videoBytes, {String? extensionFormat = '.mp4'}) async =>
+  static Future<String> saveLocalVideo(String path, Uint8List videoBytes,
+          {String? extensionFormat = '.mp4'}) async =>
       DataPersistor().saveImage(path, videoBytes);
 
   ///### Saves the string to local storage
   /// Default extension format is txt
-  static Future<void> saveLocalString(String path, String value, {String? extensionFormat = '.txt'}) async =>
+  static Future<void> saveLocalString(String path, String value,
+          {String? extensionFormat = '.txt'}) async =>
       DataPersistor().saveString(path, value);
 
   ///### Saves the json to local storage
@@ -151,21 +164,26 @@ class StorageProvider {
 
   ///### Uploads the selected image as XFile and returns a link
   /// Default extension format is png
-  static Future<String> saveImage(XFile imageFile, String path, {String? extensionFormat = '.png'}) async =>
+  static Future<String> saveImage(XFile imageFile, String path,
+          {String? extensionFormat = '.png'}) async =>
       saveBytes(imageFile, path, extensionFormat: extensionFormat);
 
   ///### Uploads the selected video as XFile and returns a link
   /// Default extension format is mp4
-  static Future<String> saveVideo(XFile videoFile, String path, {String? extensionFormat = '.mp4'}) async =>
+  static Future<String> saveVideo(XFile videoFile, String path,
+          {String? extensionFormat = '.mp4'}) async =>
       saveBytes(videoFile, path, extensionFormat: extensionFormat);
 
   ///### Uploads the selected Asset as XFile and returns file link
   /// Supports the extension format, if not set, will be set to application/octet-stream (bytes)
-  static Future<String> saveBytes(XFile imageFile, String path, {String? extensionFormat}) async {
+  static Future<String> saveBytes(XFile imageFile, String path,
+      {String? extensionFormat}) async {
     var byteData = await imageFile.readAsBytes();
     final name = imageFile.name.split('.').first;
-    String fileName = '$name-${DateTime.now().millisecondsSinceEpoch.toString()}';
-    Reference reference = FirebaseStorage.instance.ref(path + fileName + (extensionFormat ?? ""));
+    String fileName =
+        '$name-${DateTime.now().millisecondsSinceEpoch.toString()}';
+    Reference reference =
+        FirebaseStorage.instance.ref(path + fileName + (extensionFormat ?? ""));
     UploadTask uploadTask = reference.putData(byteData.buffer.asUint8List());
     if (instance._showProgress) {
       if (instance._context == null) {
@@ -174,7 +192,8 @@ class StorageProvider {
       if (instance._showDataUploadProgress != null) {
         await instance._showDataUploadProgress!(uploadTask);
       } else {
-        await FireUploader().showDataUploadProgress(instance._context!, uploadTask);
+        await FireUploader()
+            .showDataUploadProgress(instance._context!, uploadTask);
       }
     }
     TaskSnapshot storageTaskSnapshot = await uploadTask.whenComplete(() {});
@@ -324,9 +343,15 @@ class StorageProvider {
     instance._context = context ?? instance._context;
     instance._showProgress = showProgress;
     if (await selectAssets(
-        source: source, isVideo: isVideo, backgroundColor: backgroundColor, maxImagesCount: maxImagesCount)) {
+        source: source,
+        isVideo: isVideo,
+        backgroundColor: backgroundColor,
+        maxImagesCount: maxImagesCount)) {
       return (await uploadSelectedAssets(path,
-          isVideo: isVideo, extensionFormat: extensionFormat, showProgress: showProgress, context: context));
+          isVideo: isVideo,
+          extensionFormat: extensionFormat,
+          showProgress: showProgress,
+          context: context));
     } else {
       return <String>[];
     }
@@ -391,8 +416,10 @@ class StorageProvider {
     if (selectedImages != null) links = <String>[];
     for (var imageFile in selectedImages ?? selectedAssets!) {
       links.add((isVideo
-          ? await saveVideo(imageFile, path, extensionFormat: extensionFormat ?? '.mp4')
-          : await saveImage(imageFile, path, extensionFormat: extensionFormat ?? '.png')));
+          ? await saveVideo(imageFile, path,
+              extensionFormat: extensionFormat ?? '.mp4')
+          : await saveImage(imageFile, path,
+              extensionFormat: extensionFormat ?? '.png')));
     }
     selectedAssets?.clear();
     return links;
@@ -401,14 +428,17 @@ class StorageProvider {
   static set context(BuildContext? context) => instance._context = context;
 
   ///Shows upload progress indicator and MUST set the [context]
-  static set showProgress(bool showProgress) => instance._showProgress = showProgress;
+  static set showProgress(bool showProgress) =>
+      instance._showProgress = showProgress;
 
   /// You can set the ImageSource get function to have a custom implementation
   static set getImageSource(Future<ImageSource?> Function()? getImageSource) =>
       instance._getImageSource = getImageSource;
 
   /// You can set the upload progress indicator to have a custom implementation
-  static set customUploadProgressIndicator(Future<void> Function(UploadTask uploadTask)? showDataUploadProgress) =>
+  static set customUploadProgressIndicator(
+          Future<void> Function(UploadTask uploadTask)?
+              showDataUploadProgress) =>
       instance._showDataUploadProgress = showDataUploadProgress;
 
   static void configure({
