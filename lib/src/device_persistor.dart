@@ -1,9 +1,4 @@
-import 'dart:convert';
-import 'dart:typed_data';
-
-import 'package:shared_preferences/shared_preferences.dart';
-
-import '../src/repository.dart';
+part of storage_manager;
 
 ///Saves, gets and removes data locally
 ///

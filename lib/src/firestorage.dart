@@ -1,10 +1,4 @@
-import 'dart:async';
-import 'dart:io';
-
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:storage_manager/src/repository.dart';
+part of storage_manager;
 
 /// Saves, gets and removes data online with FireStorage
 ///
@@ -38,9 +32,6 @@ class FireUploader implements Repository {
         break;
       case Uint8List:
         uploadTask = reference.putData(byteData as Uint8List);
-        break;
-      case File:
-        uploadTask = reference.putFile(byteData as File);
         break;
       default:
         uploadTask = reference.putData(byteData as Uint8List);

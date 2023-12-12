@@ -1,3 +1,11 @@
+## 0.5.0
+
+- Removed File dependency for web support
+
+## 0.4.3
+
+- Added conditional imports for web support
+
 ## 0.4.2
 - Improved documentation and readme
 
