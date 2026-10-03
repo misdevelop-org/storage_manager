@@ -1,5 +1,9 @@
-library storage_manager;
+/// Upload, download and delete files in Firebase Cloud Storage, and persist
+/// strings, bytes and JSON locally with SharedPreferences, through a single
+/// [StorageProvider] API.
+library;
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:firebase_storage/firebase_storage.dart';

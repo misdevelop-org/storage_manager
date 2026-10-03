@@ -1,63 +1,58 @@
-part of storage_manager;
+part of '../storage_manager.dart';
 
-///Saves, gets and removes data locally
+/// Saves, gets and removes data locally with SharedPreferences.
 ///
-/// Supports text and raw data (saveString)
-/// Supports images, audios and raw bytes (saveImage)
-/// Supports objects in JSON format (saveObject)
+/// * Text and raw data as [String] ([saveString])
+/// * Images, videos, audios and raw bytes as base64 ([saveImage])
+/// * Objects in JSON format ([saveObject])
 class DataPersistor implements Repository {
-  /// Supports images,videos, audios and raw bytes
+  /// Saves images, videos, audios and raw bytes as a base64 string.
   Future<String> saveImage(String path, Uint8List image) async {
-    final base64Image = const Base64Encoder().convert(image);
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(path, base64Image);
+    await prefs.setString(path, base64Encode(image));
     return path;
   }
 
-  /// Supports objects in JSON format as Map<String, dynamic>
+  /// Saves an object in JSON format as `Map<String, dynamic>`.
   @override
-  Future<bool> saveObject(String path, object) async {
+  Future<bool> saveObject(String path, dynamic object) async {
     final prefs = await SharedPreferences.getInstance();
-    final string = const JsonEncoder().convert(object as Map<String, dynamic>);
-
-    return await prefs.setString(path, string);
+    return prefs.setString(path, jsonEncode(object as Map<String, dynamic>));
   }
 
-  /// Supports text and raw data as String
-  void saveString(String path, String value) async {
+  /// Saves text and raw data as [String].
+  Future<void> saveString(String path, String value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(path, value);
   }
 
-  /// Gets media bytes with given [path] as String
+  /// Gets media bytes stored at [path].
   Future<Uint8List> getImage(String path) async => getBytes(path);
 
-  /// Gets media bytes with given [path] as String
+  /// Gets bytes stored at [path], or an empty list when nothing is stored.
   Future<Uint8List> getBytes(String path) async {
     final prefs = await SharedPreferences.getInstance();
-    final base64Image = prefs.getString(path);
-    if (base64Image != null) return const Base64Decoder().convert(base64Image);
+    final base64Data = prefs.getString(path);
+    if (base64Data != null) return base64Decode(base64Data);
     return Uint8List(0);
   }
 
-  /// Gets json object with given [path] as String
+  /// Gets the JSON object stored at [path], or an empty map when nothing is stored.
   @override
   Future<Map<String, dynamic>> getObject(String path) async {
     final prefs = await SharedPreferences.getInstance();
     final objectString = prefs.getString(path);
-    if (objectString != null) {
-      return const JsonDecoder().convert(objectString) as Map<String, dynamic>;
-    }
+    if (objectString != null) return jsonDecode(objectString) as Map<String, dynamic>;
     return <String, dynamic>{};
   }
 
-  /// Gets text with given [path] as String
+  /// Gets the text stored at [path], or an empty string when nothing is stored.
   Future<String> getString(String path) async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(path) ?? '';
   }
 
-  /// Removes object with given [path] as String
+  /// Removes the value stored at [path].
   @override
   Future<void> removeObject(String path) async {
     final prefs = await SharedPreferences.getInstance();

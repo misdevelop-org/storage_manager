@@ -3,8 +3,6 @@
 *.log
 *.pyc
 *.swp
-#.flutter-plugins-dependencies
-#.flutter-plugins
 .DS_Store
 .atom/
 .buildlog/
@@ -29,3 +27,10 @@
 .dart_tool/
 .packages
 build/
+
+# Generated when running Flutter tooling in the package root
+/macos/
+example/pubspec.lock
+.flutter-plugins
+.flutter-plugins-dependencies
+example/ios/Podfile.lock

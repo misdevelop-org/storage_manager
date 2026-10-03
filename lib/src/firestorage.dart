@@ -1,101 +1,84 @@
-part of storage_manager;
+part of '../storage_manager.dart';
 
-/// Saves, gets and removes data online with FireStorage
+/// Saves, gets and removes data online with Firebase Cloud Storage.
 ///
-/// Supports images from Asset file [saveImage]
-/// Supports images, audios, videos and  files from bytes [saveFileFromBytes]
-/// Supports files from File [saveFile]
-///
-/// - Facilitates Image selection from gallery and camera
-/// - Facilitates upload progress indicator as Flash Bar
+/// * Uploads a [String], [Uint8List] or `List<int>` ([saveObject])
+/// * Downloads bytes ([getObject]) and lists a folder ([getObjectsFromPath])
+/// * Removes files by path ([removeObject]) or download URL ([removeObjectFromUrl])
+/// * Optionally shows an upload progress dialog ([showDataUploadProgress])
 class FireUploader implements Repository {
-  ///Uploads the selected bytes and returns file link
-  /// Supports the extension format, if not set, will be set to application/octet-stream (bytes)
+  /// Uploads [byteData] to `path + fileName + extensionFormat` and returns its download URL.
   ///
-  /// * [bool] __showProgress__: if true, shows upload progress indicator and MUST set the [context]
-  ///
-  /// * [BuildContext] context: if [showProgress] is true, MUST set the [context]
+  /// * [byteData] must be a [String], [Uint8List] or `List<int>`.
+  /// * [fileName] defaults to the current timestamp in milliseconds.
+  /// * [extensionFormat] (e.g. `.png`) is appended to the file name when set.
+  /// * When [showProgress] is true, [context] MUST be set.
   @override
-  Future<String> saveObject(String path, byteData,
-      {String? extensionFormat,
-      String? fileName,
-      bool showProgress = false,
-      BuildContext? context}) async {
-    String fileNameAux =
-        fileName ?? DateTime.now().millisecondsSinceEpoch.toString();
-    Reference reference = FirebaseStorage.instance
-        .ref(path + fileNameAux + (extensionFormat ?? ""));
-    UploadTask? uploadTask;
-    switch (byteData.runtimeType) {
-      case String:
-        uploadTask = reference.putString(byteData as String);
-        break;
-      case Uint8List:
-        uploadTask = reference.putData(byteData as Uint8List);
-        break;
-      default:
-        uploadTask = reference.putData(byteData as Uint8List);
-    }
+  Future<String> saveObject(
+    String path,
+    dynamic byteData, {
+    String? extensionFormat,
+    String? fileName,
+    bool showProgress = false,
+    BuildContext? context,
+  }) async {
+    final name = fileName ?? DateTime.now().millisecondsSinceEpoch.toString();
+    final reference = FirebaseStorage.instance.ref(path + name + (extensionFormat ?? ''));
+    final UploadTask uploadTask = switch (byteData) {
+      String text => reference.putString(text),
+      Uint8List bytes => reference.putData(bytes),
+      List<int> bytes => reference.putData(Uint8List.fromList(bytes)),
+      _ => throw ArgumentError.value(byteData, 'byteData', 'Must be a String, Uint8List or List<int>'),
+    };
     if (showProgress) {
       if (context != null) {
         await showDataUploadProgress(context, uploadTask);
-      } else {
-        if (kDebugMode) {
-          throw 'Must set context if show progress is true';
-        }
+      } else if (kDebugMode) {
+        throw ArgumentError('Must set context if showProgress is true');
       }
     }
-    return await getDownloadUrl(uploadTask);
+    return getDownloadUrl(uploadTask);
   }
 
+  /// Waits for [uploadTask] to finish and returns the uploaded file's download URL.
   Future<String> getDownloadUrl(UploadTask uploadTask) async {
-    TaskSnapshot storageTaskSnapshot = await uploadTask.whenComplete(() {});
-    return await storageTaskSnapshot.ref.getDownloadURL();
+    final snapshot = await uploadTask;
+    return snapshot.ref.getDownloadURL();
   }
 
+  /// Downloads the bytes of the file at [path].
   @override
-  Future<Uint8List?> getObject(String path) async =>
-      await referenceFromPath(path).getData();
+  Future<Uint8List?> getObject(String path) => referenceFromPath(path).getData();
 
-  Reference referenceFromPath(String path) =>
-      FirebaseStorage.instance.ref(path);
+  /// Returns the Storage [Reference] for [path].
+  Reference referenceFromPath(String path) => FirebaseStorage.instance.ref(path);
 
+  /// Lists the full paths of the files directly under [path].
   Future<List<String>?> getObjectsFromPath(String path) async {
-    final objList = await FirebaseStorage.instance.ref(path).listAll();
-    return objList.items.map((obj) => obj.fullPath).toList();
+    final result = await FirebaseStorage.instance.ref(path).listAll();
+    return result.items.map((item) => item.fullPath).toList();
   }
 
-  /// Removes the file from the given [path]
+  /// Removes the file at [path]. Returns false when the deletion fails.
   @override
-  Future<bool> removeObject(String path) async {
+  Future<bool> removeObject(String path) => _delete(() => FirebaseStorage.instance.ref(path).delete());
+
+  /// Removes the file behind the download [url]. Returns false when the deletion fails.
+  Future<bool> removeObjectFromUrl(String url) => _delete(() => FirebaseStorage.instance.refFromURL(url).delete());
+
+  Future<bool> _delete(Future<void> Function() delete) async {
     try {
-      await FirebaseStorage.instance.ref(path).delete();
+      await delete();
+      return true;
     } catch (err, stack) {
-      if (kDebugMode) {
-        print(err);
-        print(stack);
-      }
+      debugPrint('$err\n$stack');
       return false;
     }
-    return true;
   }
 
-  ///Remove file from Url
-  Future<bool> removeObjectFromUrl(String url) async {
-    try {
-      await FirebaseStorage.instance.refFromURL(url).delete();
-    } catch (err, stack) {
-      if (kDebugMode) {
-        print(err);
-        print(stack);
-      }
-      return false;
-    }
-    return true;
-  }
-
-  showDataUploadProgress(BuildContext buildContext, UploadTask uploadTask) {
-    return showDialog(
+  /// Shows a dialog with the progress of [uploadTask] that closes itself when the upload succeeds.
+  Future<void> showDataUploadProgress(BuildContext buildContext, UploadTask uploadTask) {
+    return showDialog<void>(
       context: buildContext,
       barrierDismissible: true,
       builder: (context) {
@@ -104,19 +87,17 @@ class FireUploader implements Repository {
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               return AlertDialog(
-                  title: const Text('Uploading...'),
-                  content: ProgressFromUploadTask(
-                    task: uploadTask,
-                    onDone: () {
-                      Navigator.pop(context);
-                    },
-                  ));
-            } else {
-              return const AlertDialog(
-                title: Text('Waiting...'),
-                content: LinearProgressIndicator(),
+                title: const Text('Uploading...'),
+                content: ProgressFromUploadTask(
+                  task: uploadTask,
+                  onDone: () => Navigator.pop(context),
+                ),
               );
             }
+            return const AlertDialog(
+              title: Text('Waiting...'),
+              content: LinearProgressIndicator(),
+            );
           },
         );
       },
@@ -124,68 +105,59 @@ class FireUploader implements Repository {
   }
 }
 
-///Creates a Flash bar with a LinearProgress indicating the upload task
+/// A [LinearProgressIndicator] that follows [task] and calls [onDone] once it succeeds.
 class ProgressFromUploadTask extends StatefulWidget {
+  /// The upload to follow.
   final UploadTask task;
-  final Function onDone;
-  const ProgressFromUploadTask(
-      {Key? key, required this.task, required this.onDone})
-      : super(key: key);
+
+  /// Called once when the upload succeeds.
+  final VoidCallback onDone;
+
+  const ProgressFromUploadTask({super.key, required this.task, required this.onDone});
+
   @override
-  _ProgressFromUploadTaskState createState() => _ProgressFromUploadTaskState();
+  State<ProgressFromUploadTask> createState() => _ProgressFromUploadTaskState();
 }
 
 class _ProgressFromUploadTaskState extends State<ProgressFromUploadTask> {
+  StreamSubscription<TaskSnapshot>? _subscription;
   double value = 0;
   bool ended = false;
-
-  ///Shows the ProgressIndicator in the flash bar
-  show() async {
-    widget.task.snapshotEvents.listen(
-      (event) {
-        if (mounted) {
-          setState(() {
-            value = event.bytesTransferred / event.totalBytes;
-          });
-        }
-        if (value == 1 && !ended) {
-          widget.onDone();
-          ended = true;
-        }
-      },
-    );
-  }
 
   @override
   void initState() {
     super.initState();
-    show();
+    _subscription = widget.task.snapshotEvents.listen((event) {
+      if (event.totalBytes > 0 && mounted) {
+        setState(() => value = event.bytesTransferred / event.totalBytes);
+      }
+      if (event.state == TaskState.success && !ended) {
+        ended = true;
+        widget.onDone();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return ended
-        ? Container(
-            width: 100,
-            height: 60,
-            decoration: BoxDecoration(
-                color: Colors.green[700],
-                borderRadius: BorderRadius.circular(20)),
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.done,
-                  size: 30,
-                  color: Colors.white,
-                ),
-                Text(
-                  "Done!",
-                  style: TextStyle(color: Colors.white, fontSize: 20),
-                ),
-              ],
-            ),
-          )
-        : LinearProgressIndicator(value: value);
+    if (!ended) return LinearProgressIndicator(value: value);
+    return Container(
+      width: 100,
+      height: 60,
+      decoration: BoxDecoration(color: Colors.green[700], borderRadius: BorderRadius.circular(20)),
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.done, size: 30, color: Colors.white),
+          Text('Done!', style: TextStyle(color: Colors.white, fontSize: 20)),
+        ],
+      ),
+    );
   }
 }

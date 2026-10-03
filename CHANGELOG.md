@@ -1,3 +1,19 @@
+## 0.7.0
+
+- Supports `firebase_storage` 13 (FlutterFire 4 / Firebase SDK 12) while still accepting 12.x.
+- Requires Dart 3.6 and Flutter 3.27. Upgraded `image_picker`, `shared_preferences` and `flutter_lints`.
+- Fixed `StorageProvider.get()` always returning `null`.
+- Fixed remote `getString()` / `getJson()` crashing with a type error. Downloaded bytes are now decoded as UTF-8.
+- Fixed `save()` with `Uint8List` or `List<int>` values. Local saves of bytes threw a cast error, and remote saves
+  of `List<int>` failed.
+- Fixed local saves and removes not being awaited.
+- Fixed `uploadSelectedAssets()` returning the links of earlier uploads together with the new ones.
+- `selectAssets()` now honours `maxImagesCount` for gallery multi-selection and returns `false` when the user cancels.
+- The upload progress indicator cancels its stream subscription on dispose, handles `totalBytes == 0`, and finishes
+  on `TaskState.success`.
+- `ProgressFromUploadTask.onDone` is now typed as `VoidCallback`.
+- Added unit tests, CI, and a rewritten README.
+
 ## 0.6.0
 
 - Updated dependencies for Flutter version 3.27.0

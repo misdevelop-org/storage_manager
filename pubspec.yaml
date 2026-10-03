@@ -1,20 +1,30 @@
 name: storage_manager
-description: FireStorage & DevicePersistor Manager facilitates quick implementation in your app
-version: 0.6.0
+description: >-
+  Upload, download and delete files in Firebase Cloud Storage and persist strings, bytes and JSON locally,
+  with a built-in image/video picker and upload progress dialog.
+version: 0.7.0
 homepage: https://github.com/misdevelop-org/storage_manager
+repository: https://github.com/misdevelop-org/storage_manager
+issue_tracker: https://github.com/misdevelop-org/storage_manager/issues
+topics:
+  - firebase
+  - storage
+  - upload
+  - image-picker
+  - shared-preferences
 
 environment:
-  sdk: ">=3.4.0 <4.0.0"
+  sdk: ">=3.6.0 <4.0.0"
   flutter: ">=3.27.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  firebase_storage: ^12.3.7
-  shared_preferences: ^2.2.2
-  image_picker: ^1.0.4
+  firebase_storage: ">=12.3.7 <14.0.0"
+  image_picker: ^1.1.2
+  shared_preferences: ^2.3.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^1.0.0
+  flutter_lints: ^6.0.0

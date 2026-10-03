@@ -15,14 +15,14 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Storage Manager Demo',
       theme: ThemeData(
-        primarySwatch: Colors.deepPurple,
+        colorSchemeSeed: Colors.deepPurple,
       ),
       home: const MyHomePage(title: 'Storage Manager Demo'),
     );
@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
+  const MyHomePage({super.key, required this.title});
   final String title;
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -161,20 +161,18 @@ class _MyHomePageState extends State<MyHomePage> {
                     const SizedBox(height: 20),
                     const Text("Uploaded files links",
                         style: TextStyle(color: Colors.white), textAlign: TextAlign.center),
-                    ...links
-                        .map((e) => Card(
-                              child: ListTile(
-                                title: Text(e),
-                                subtitle: Image.network(
-                                  e,
-                                  // imageUrl: e,
-                                  width: 400,
-                                  height: 400,
-                                  fit: BoxFit.contain,
-                                ),
-                              ),
-                            ))
-                        .toList(),
+                    ...links.map((e) => Card(
+                          child: ListTile(
+                            title: Text(e),
+                            subtitle: Image.network(
+                              e,
+                              // imageUrl: e,
+                              width: 400,
+                              height: 400,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        )),
                     const SizedBox(height: 20),
                   ],
                 ),
