@@ -1,3 +1,7 @@
+## 0.6.0
+
+- Updated dependencies for Flutter version 3.27.0
+
 ## 0.5.0
 
 - Removed File dependency for web support
